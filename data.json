@@ -1,9 +1,9 @@
 {
   "usina": {
-    "potencia": "40.60",
-    "geracao_hoje": "71.91",
-    "cota_6": "4.31",
-    "total_acumulado": "6.26"
+    "potencia": "44.44",
+    "geracao_hoje": "92.25",
+    "cota_6": "5.54",
+    "total_acumulado": "6.28"
   },
   "byd": {
     "bateria": "78%",
@@ -14,5 +14,5 @@
     "irradiancia": "0 W/m²",
     "temperatura": "-- °C"
   },
-  "atualizado_em": "23/07/2026 - 10:29"
+  "atualizado_em": "23/07/2026 - 10:59"
 }
