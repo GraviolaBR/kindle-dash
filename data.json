@@ -5,14 +5,34 @@
     "cota_6": "11.37",
     "total_acumulado": "6.19"
   },
+  "fechadura": {
+    "trancada": true
+  },
+  "lista_compras": [
+    "Café",
+    "Pão",
+    "Leite"
+  ],
   "byd": {
     "bateria": "78%",
     "status": "Pronto para Carga",
     "autonomia_ev": "55 km"
   },
+  "temperaturas": {
+    "sala": "22",
+    "quarto": "20",
+    "cozinha": "23"
+  },
   "ambiente": {
     "irradiancia": "0 W/m²",
     "temperatura": "-- °C"
   },
+  "previsao": [
+    { "dia": "Hoje", "icone": "🌙", "max": "--", "min": "--" },
+    { "dia": "Amanhã", "icone": "☀️", "max": "27", "min": "19" },
+    { "dia": "Sex", "icone": "⛅", "max": "26", "min": "18" },
+    { "dia": "Sáb", "icone": "⛅", "max": "25", "min": "18" },
+    { "dia": "Dom", "icone": "☀️", "max": "28", "min": "20" }
+  ],
   "atualizado_em": "22/07/2026 - 23:59"
 }
