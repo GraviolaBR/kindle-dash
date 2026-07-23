@@ -15,85 +15,108 @@
     }
   </style>
 </head>
-<body class="p-8 flex flex-col justify-between border-8 border-black">
+<body class="p-6 flex flex-col justify-between border-8 border-black">
 
-  <!-- CABEÇALHO DA CASA INTELIGENTE -->
-  <header class="flex justify-between items-center border-b-4 border-black pb-4">
+  <!-- CABEÇALHO -->
+  <header class="flex justify-between items-center border-b-4 border-black pb-3">
     <div>
-      <h1 class="text-4xl font-black tracking-tight uppercase">CASA INTELIGENTE • HUB CENTRAL</h1>
-      <p class="text-xl text-gray-700 font-semibold" id="home-status">🏠 SISTEMA OPERACIONAL</p>
+      <h1 class="text-3xl font-black tracking-tight uppercase">CASA INTELIGENTE • HUB CENTRAL</h1>
+      <p class="text-lg text-gray-700 font-semibold" id="home-status">🏠 SISTEMA OPERACIONAL</p>
     </div>
+    
+    <!-- NOVO: STATUS FECHADURA PRINCIPAL -->
+    <div id="lock-badge" class="flex items-center gap-2 border-4 border-black bg-black text-white px-4 py-1.5 rounded-xl font-black text-xl">
+      <span id="lock-icon">🔒</span>
+      <span id="lock-text">FECHADURA: TRANCADA</span>
+    </div>
+
     <div class="text-right">
-      <span class="text-2xl font-bold bg-black text-white px-4 py-2 rounded-lg" id="datetime">--/--/---- --:--</span>
+      <span class="text-xl font-bold border-4 border-black px-4 py-1.5 rounded-xl" id="datetime">--/--/---- --:--</span>
     </div>
   </header>
 
-  <!-- GRID MODULAR PRINCIPAL -->
-  <main class="grid grid-cols-12 gap-6 my-auto">
+  <!-- GRID PRINCIPAL (12 COLUNAS) -->
+  <main class="grid grid-cols-12 gap-5 my-auto">
     
-    <!-- MÓDULO 1: USINA SOLAR (8 COLUNAS) -->
-    <section class="col-span-8 border-4 border-black p-6 rounded-2xl flex flex-col justify-between">
+    <!-- COLUNA 1: USINA SOLAR (5 COLUNAS) -->
+    <section class="col-span-5 border-4 border-black p-5 rounded-2xl flex flex-col justify-between">
       <div class="flex justify-between items-center border-b-2 border-black pb-2">
-        <h2 class="text-2xl font-black uppercase">☀️ Usina Solar</h2>
-        <span class="text-lg font-bold" id="solar-status">Status: Ativo</span>
+        <h2 class="text-xl font-black uppercase">☀️ Usina Solar</h2>
+        <span class="text-sm font-bold" id="solar-status">Status: Ativo</span>
       </div>
 
-      <div class="my-4">
-        <p class="text-xl font-bold text-gray-600">POTÊNCIA ATUAL</p>
+      <div class="my-2">
+        <p class="text-sm font-bold text-gray-600">POTÊNCIA ATUAL</p>
         <div class="flex items-baseline">
-          <span class="text-9xl font-black" id="solar-power">0.00</span>
-          <span class="text-4xl font-bold ml-4">kW</span>
+          <span class="text-8xl font-black" id="solar-power">0.00</span>
+          <span class="text-3xl font-bold ml-3">kW</span>
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-4 border-t-2 border-black pt-4">
+      <div class="grid grid-cols-3 gap-2 border-t-2 border-black pt-3">
         <div>
-          <p class="text-base font-semibold text-gray-600">Geração Hoje</p>
-          <p class="text-3xl font-black"><span id="solar-today">0.00</span> <span class="text-lg font-normal">kWh</span></p>
+          <p class="text-xs font-semibold text-gray-600">Geração Hoje</p>
+          <p class="text-2xl font-black"><span id="solar-today">0.00</span> <span class="text-sm font-normal">kWh</span></p>
         </div>
         <div>
-          <p class="text-base font-semibold text-gray-600">Cota (6%)</p>
-          <p class="text-3xl font-black"><span id="solar-cota">0.00</span> <span class="text-lg font-normal">kWh</span></p>
+          <p class="text-xs font-semibold text-gray-600">Cota (6%)</p>
+          <p class="text-2xl font-black"><span id="solar-cota">0.00</span> <span class="text-sm font-normal">kWh</span></p>
         </div>
         <div>
-          <p class="text-base font-semibold text-gray-600">Total Acumulado</p>
-          <p class="text-3xl font-black"><span id="solar-total">0.00</span> <span class="text-lg font-normal">MWh</span></p>
+          <p class="text-xs font-semibold text-gray-600">Total Acumulado</p>
+          <p class="text-2xl font-black"><span id="solar-total">0.00</span> <span class="text-sm font-normal">MWh</span></p>
         </div>
       </div>
     </section>
 
-    <!-- PAINEL LATERAL (4 COLUNAS) -->
-    <div class="col-span-4 flex flex-col justify-between gap-6">
+    <!-- COLUNA 2: LISTA DE COMPRAS ALEXA (4 COLUNAS) -->
+    <section class="col-span-4 border-4 border-black p-5 rounded-2xl flex flex-col justify-between">
+      <div class="flex justify-between items-center border-b-2 border-black pb-2">
+        <h2 class="text-xl font-black uppercase">🛒 Lista de Compras</h2>
+        <span class="text-xs font-bold border border-black px-2 py-0.5 rounded">Alexa</span>
+      </div>
+
+      <ul id="shopping-list" class="my-3 space-y-2 text-base font-bold flex-1 overflow-hidden">
+        <li class="flex items-center"><span class="mr-2">☐</span> Carregando lista...</li>
+      </ul>
+
+      <p class="text-xs text-gray-500 font-bold border-t-2 border-black pt-2">Diga: "Alexa, adicione [item] na lista"</p>
+    </section>
+
+    <!-- COLUNA 3: BYD & SENSORES (3 COLUNAS) -->
+    <div class="col-span-3 flex flex-col justify-between gap-4">
       
-      <!-- MÓDULO 2: BYD SONG PRO -->
-      <section class="border-4 border-black p-6 rounded-2xl flex-1 flex flex-col justify-between">
-        <div class="flex justify-between items-center border-b-2 border-black pb-2">
-          <h3 class="text-xl font-black">🚗 BYD SONG PRO</h3>
-          <span class="text-sm font-bold border-2 border-black px-2 py-0.5 rounded">PHEV</span>
+      <!-- BYD SONG PRO -->
+      <section class="border-4 border-black p-4 rounded-2xl flex-1 flex flex-col justify-between">
+        <div class="flex justify-between items-center border-b-2 border-black pb-1">
+          <h3 class="text-lg font-black">🚗 BYD SONG PRO</h3>
+          <span class="text-xs font-bold border border-black px-1.5 py-0.5 rounded">PHEV</span>
         </div>
         
         <div class="my-2">
           <div class="flex justify-between items-baseline mb-1">
-            <span class="text-base font-bold">Bateria</span>
-            <span class="text-3xl font-black" id="byd-soc">--%</span>
+            <span class="text-xs font-bold">Bateria EV</span>
+            <span class="text-2xl font-black" id="byd-soc">--%</span>
           </div>
-          <div class="w-full bg-gray-200 h-7 rounded-lg overflow-hidden border-2 border-black">
+          <div class="w-full bg-gray-200 h-5 rounded-md overflow-hidden border-2 border-black">
             <div id="byd-bar" class="bg-black h-full" style="width: 0%"></div>
           </div>
         </div>
 
-        <div class="text-sm font-semibold space-y-1">
+        <div class="text-xs font-semibold space-y-0.5">
           <p id="byd-status">⚡ Status: --</p>
           <p id="byd-range">🔋 Autonomia EV: -- km</p>
         </div>
       </section>
 
-      <!-- MÓDULO 3: SENSORES / CLIMA -->
+      <!-- TEMPERATURA DOS CÔMODOS -->
       <section class="border-4 border-black p-4 rounded-2xl bg-gray-50 flex flex-col justify-between">
-        <h4 class="text-lg font-black border-b-2 border-black pb-1 mb-2">🌿 Sensores & Ambiente</h4>
-        <div class="grid grid-cols-2 gap-2 text-sm font-bold">
-          <div>Irradiância: <br><span class="text-xl font-black" id="env-irrad">-- W/m²</span></div>
-          <div>Temperatura: <br><span class="text-xl font-black" id="env-temp">-- °C</span></div>
+        <h4 class="text-sm font-black border-b-2 border-black pb-1 mb-2">🌡️ Temperaturas</h4>
+        <div id="room-temperatures" class="grid grid-cols-2 gap-2 text-xs font-bold">
+          <div>Sala: <span class="font-black text-sm" id="temp-sala">--°C</span></div>
+          <div>Quarto: <span class="font-black text-sm" id="temp-quarto">--°C</span></div>
+          <div>Cozinha: <span class="font-black text-sm" id="temp-cozinha">--°C</span></div>
+          <div>Externa: <span class="font-black text-sm" id="env-temp">--°C</span></div>
         </div>
       </section>
 
@@ -101,13 +124,30 @@
 
   </main>
 
+  <!-- MÓDULO 4: PREVISÃO DO TEMPO (5 DIAS) -->
+  <section class="border-4 border-black p-4 rounded-2xl my-2">
+    <div class="flex justify-between items-center border-b-2 border-black pb-1 mb-3">
+      <h3 class="text-base font-black uppercase">📅 Previsão do Tempo (Próximos 5 Dias)</h3>
+      <span class="text-xs font-bold">Irradiância Solar: <strong id="env-irrad">-- W/m²</strong></span>
+    </div>
+
+    <div id="weather-forecast" class="grid grid-cols-5 gap-4 text-center">
+      <!-- Os cards de previsão serão inseridos dinamicamente aqui -->
+      <div class="border-2 border-black p-2 rounded-xl">
+        <p class="font-black text-sm">---</p>
+        <p class="text-2xl my-1">☀️</p>
+        <p class="font-extrabold text-sm">--° / --°</p>
+      </div>
+    </div>
+  </section>
+
   <!-- RODAPÉ -->
-  <footer class="flex justify-between items-center border-t-2 border-black pt-3 text-xs font-bold tracking-wider">
+  <footer class="flex justify-between items-center border-t-2 border-black pt-2 text-xs font-bold tracking-wider">
     <span>TRMNL OS • HOME DISPLAY HUB</span>
     <span>ÚLTIMA SINCRONIZAÇÃO: <span id="last-update">--:--:--</span></span>
   </footer>
 
-  <!-- SCRIPT QUE LE O DATA.JSON -->
+  <!-- SCRIPT DE CARREGAMENTO -->
   <script>
     async function carregarDados() {
       try {
@@ -116,26 +156,70 @@
         
         const data = await resposta.json();
 
-        // Atualiza Usina Solar
+        // 1. Atualiza Fechadura Eletrônica
+        const lockBadge = document.getElementById('lock-badge');
+        const lockIcon = document.getElementById('lock-icon');
+        const lockText = document.getElementById('lock-text');
+        
+        if (data.fechadura && data.fechadura.trancada) {
+          lockBadge.className = "flex items-center gap-2 border-4 border-black bg-black text-white px-4 py-1.5 rounded-xl font-black text-xl";
+          lockIcon.innerText = "🔒";
+          lockText.innerText = "FECHADURA: TRANCADA";
+        } else {
+          lockBadge.className = "flex items-center gap-2 border-4 border-black bg-white text-black px-4 py-1.5 rounded-xl font-black text-xl";
+          lockIcon.innerText = "🔓";
+          lockText.innerText = "FECHADURA: ABERTA";
+        }
+
+        // 2. Atualiza Usina Solar
         document.getElementById('solar-power').innerText = data.usina.potencia;
         document.getElementById('solar-today').innerText = data.usina.geracao_hoje;
         document.getElementById('solar-cota').innerText = data.usina.cota_6;
         document.getElementById('solar-total').innerText = data.usina.total_acumulado;
 
-        // Atualiza BYD Song Pro
+        // 3. Atualiza Lista de Compras
+        const listContainer = document.getElementById('shopping-list');
+        if (data.lista_compras && data.lista_compras.length > 0) {
+          listContainer.innerHTML = data.lista_compras.slice(0, 6).map(item => 
+            `<li class="flex items-center border-b border-gray-300 pb-1"><span class="mr-2 text-lg">☐</span> ${item}</li>`
+          ).join('');
+        } else {
+          listContainer.innerHTML = '<li class="text-gray-500">Nenhum item na lista</li>';
+        }
+
+        // 4. Atualiza BYD Song Pro
         document.getElementById('byd-soc').innerText = data.byd.bateria;
         document.getElementById('byd-bar').style.width = data.byd.bateria;
         document.getElementById('byd-status').innerText = '⚡ Status: ' + data.byd.status;
         document.getElementById('byd-range').innerText = '🔋 Autonomia EV: ' + data.byd.autonomia_ev;
 
-        // Atualiza Clima e Timestamps
+        // 5. Atualiza Temperaturas dos Cômodos
+        if (data.temperaturas) {
+          document.getElementById('temp-sala').innerText = data.temperaturas.sala + '°C';
+          document.getElementById('temp-quarto').innerText = data.temperaturas.quarto + '°C';
+          document.getElementById('temp-cozinha').innerText = data.temperaturas.cozinha + '°C';
+        }
+        document.getElementById('env-temp').innerText = data.ambiente.temperatura + '°C';
         document.getElementById('env-irrad').innerText = data.ambiente.irradiancia;
-        document.getElementById('env-temp').innerText = data.ambiente.temperatura;
+
+        // 6. Atualiza Previsão do Tempo (5 Dias)
+        const forecastContainer = document.getElementById('weather-forecast');
+        if (data.previsao && data.previsao.length >= 5) {
+          forecastContainer.innerHTML = data.previsao.slice(0, 5).map(dia => `
+            <div class="border-2 border-black p-2 rounded-xl bg-gray-50">
+              <p class="font-black text-xs uppercase">${dia.dia}</p>
+              <p class="text-2xl my-1">${dia.icone}</p>
+              <p class="font-black text-xs">${dia.max}° / <span class="text-gray-600">${dia.min}°</span></p>
+            </div>
+          `).join('');
+        }
+
+        // 7. Timestamps
         document.getElementById('datetime').innerText = data.atualizado_em;
         document.getElementById('last-update').innerText = data.atualizado_em;
 
       } catch (e) {
-        console.error("Aguardando carregamento de data.json...", e);
+        console.error("Erro ao carregar data.json:", e);
       }
     }
 
