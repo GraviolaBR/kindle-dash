@@ -1,9 +1,9 @@
 {
   "usina": {
-    "potencia": "49.96",
-    "geracao_hoje": "189.20",
-    "cota_6": "11.35",
-    "total_acumulado": "6.38"
+    "potencia": "50.00",
+    "geracao_hoje": "213.10",
+    "cota_6": "12.79",
+    "total_acumulado": "6.40"
   },
   "byd": {
     "bateria": "78%",
@@ -11,8 +11,8 @@
     "autonomia_ev": "55 km"
   },
   "ambiente": {
-    "irradiancia": "695 W/m²",
-    "temperatura": "28.4 °C"
+    "irradiancia": "0 W/m²",
+    "temperatura": "-- °C"
   },
-  "atualizado_em": "23/07/2026 - 12:59"
+  "atualizado_em": "23/07/2026 - 13:29"
 }
