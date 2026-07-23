@@ -1,17 +1,20 @@
 {
+  "atualizado_em": "23/07/2026 - 12:22",
+  "fechadura": {
+    "trancada": true
+  },
   "usina": {
     "potencia": "0.00",
     "geracao_hoje": "189.45",
     "cota_6": "11.37",
     "total_acumulado": "6.19"
   },
-  "fechadura": {
-    "trancada": true
-  },
   "lista_compras": [
-    "Café",
-    "Pão",
-    "Leite"
+    "Café em pó",
+    "Pão de forma",
+    "Leite",
+    "Detergente",
+    "Azeite de oliva"
   ],
   "byd": {
     "bateria": "78%",
@@ -24,15 +27,14 @@
     "cozinha": "23"
   },
   "ambiente": {
-    "irradiancia": "0 W/m²",
-    "temperatura": "-- °C"
+    "temperatura": "24",
+    "irradiancia": "0 W/m²"
   },
   "previsao": [
-    { "dia": "Hoje", "icone": "🌙", "max": "--", "min": "--" },
-    { "dia": "Amanhã", "icone": "☀️", "max": "27", "min": "19" },
-    { "dia": "Sex", "icone": "⛅", "max": "26", "min": "18" },
-    { "dia": "Sáb", "icone": "⛅", "max": "25", "min": "18" },
-    { "dia": "Dom", "icone": "☀️", "max": "28", "min": "20" }
-  ],
-  "atualizado_em": "22/07/2026 - 23:59"
+    { "dia": "Hoje", "icone": "☀️", "max": "28", "min": "19" },
+    { "dia": "Sex", "icone": "⛅", "max": "27", "min": "18" },
+    { "dia": "Sáb", "icone": "🌧️", "max": "23", "min": "17" },
+    { "dia": "Dom", "icone": "⛅", "max": "25", "min": "18" },
+    { "dia": "Seg", "icone": "☀️", "max": "29", "min": "20" }
+  ]
 }
