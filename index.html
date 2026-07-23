@@ -17,14 +17,14 @@
 </head>
 <body class="p-6 flex flex-col justify-between border-8 border-black">
 
-  <!-- CABEÇALHO -->
+  <!-- 1. CABEÇALHO -->
   <header class="flex justify-between items-center border-b-4 border-black pb-3">
     <div>
       <h1 class="text-3xl font-black tracking-tight uppercase">CASA INTELIGENTE • HUB CENTRAL</h1>
       <p class="text-lg text-gray-700 font-semibold" id="home-status">🏠 SISTEMA OPERACIONAL</p>
     </div>
     
-    <!-- NOVO: STATUS FECHADURA PRINCIPAL -->
+    <!-- STATUS FECHADURA PRINCIPAL -->
     <div id="lock-badge" class="flex items-center gap-2 border-4 border-black bg-black text-white px-4 py-1.5 rounded-xl font-black text-xl">
       <span id="lock-icon">🔒</span>
       <span id="lock-text">FECHADURA: TRANCADA</span>
@@ -35,18 +35,35 @@
     </div>
   </header>
 
-  <!-- GRID PRINCIPAL (12 COLUNAS) -->
-  <main class="grid grid-cols-12 gap-5 my-auto">
+  <!-- 2. PREVISÃO DO TEMPO (NO TOPO, ACIMA DOS BLOCOS) -->
+  <section class="border-4 border-black p-3.5 rounded-2xl my-2 bg-gray-50">
+    <div class="flex justify-between items-center border-b-2 border-black pb-1 mb-2">
+      <h3 class="text-sm font-black uppercase">📅 Previsão do Tempo (Próximos 5 Dias)</h3>
+      <span class="text-xs font-bold">Irradiância Solar: <strong id="env-irrad">-- W/m²</strong></span>
+    </div>
+
+    <div id="weather-forecast" class="grid grid-cols-5 gap-3 text-center">
+      <!-- Cards gerados via JS -->
+      <div class="border-2 border-black p-1.5 rounded-xl bg-white">
+        <p class="font-black text-xs">---</p>
+        <p class="text-xl my-0.5">☀️</p>
+        <p class="font-black text-xs">--° / --°</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. BLOCOS CENTRAIS (USINA SOLAR + BYD AZUL & TEMPERATURAS) -->
+  <main class="grid grid-cols-12 gap-4 my-auto">
     
-    <!-- COLUNA 1: USINA SOLAR (5 COLUNAS) -->
-    <section class="col-span-5 border-4 border-black p-5 rounded-2xl flex flex-col justify-between">
+    <!-- USINA SOLAR (8 COLUNAS) -->
+    <section class="col-span-8 border-4 border-black p-5 rounded-2xl flex flex-col justify-between">
       <div class="flex justify-between items-center border-b-2 border-black pb-2">
         <h2 class="text-xl font-black uppercase">☀️ Usina Solar</h2>
         <span class="text-sm font-bold" id="solar-status">Status: Ativo</span>
       </div>
 
       <div class="my-2">
-        <p class="text-sm font-bold text-gray-600">POTÊNCIA ATUAL</p>
+        <p class="text-xs font-bold text-gray-600">POTÊNCIA ATUAL</p>
         <div class="flex items-baseline">
           <span class="text-8xl font-black" id="solar-power">0.00</span>
           <span class="text-3xl font-bold ml-3">kW</span>
@@ -69,31 +86,19 @@
       </div>
     </section>
 
-    <!-- COLUNA 2: LISTA DE COMPRAS ALEXA (4 COLUNAS) -->
-    <section class="col-span-4 border-4 border-black p-5 rounded-2xl flex flex-col justify-between">
-      <div class="flex justify-between items-center border-b-2 border-black pb-2">
-        <h2 class="text-xl font-black uppercase">🛒 Lista de Compras</h2>
-        <span class="text-xs font-bold border border-black px-2 py-0.5 rounded">Alexa</span>
-      </div>
-
-      <ul id="shopping-list" class="my-3 space-y-2 text-base font-bold flex-1 overflow-hidden">
-        <li class="flex items-center"><span class="mr-2">☐</span> Carregando lista...</li>
-      </ul>
-
-      <p class="text-xs text-gray-500 font-bold border-t-2 border-black pt-2">Diga: "Alexa, adicione [item] na lista"</p>
-    </section>
-
-    <!-- COLUNA 3: BYD & SENSORES (3 COLUNAS) -->
-    <div class="col-span-3 flex flex-col justify-between gap-4">
+    <!-- BYD AZUL + SENSORES (4 COLUNAS) -->
+    <div class="col-span-4 flex flex-col justify-between gap-3">
       
-      <!-- BYD SONG PRO -->
+      <!-- BYD SONG PRO (AZUL) -->
       <section class="border-4 border-black p-4 rounded-2xl flex-1 flex flex-col justify-between">
         <div class="flex justify-between items-center border-b-2 border-black pb-1">
-          <h3 class="text-lg font-black">🚗 BYD SONG PRO</h3>
+          <h3 class="text-lg font-black flex items-center gap-1">
+            <span>🚙</span> BYD SONG PRO <span class="text-xs bg-black text-white px-1.5 py-0.5 rounded ml-1">AZUL</span>
+          </h3>
           <span class="text-xs font-bold border border-black px-1.5 py-0.5 rounded">PHEV</span>
         </div>
         
-        <div class="my-2">
+        <div class="my-1.5">
           <div class="flex justify-between items-baseline mb-1">
             <span class="text-xs font-bold">Bateria EV</span>
             <span class="text-2xl font-black" id="byd-soc">--%</span>
@@ -110,8 +115,8 @@
       </section>
 
       <!-- TEMPERATURA DOS CÔMODOS -->
-      <section class="border-4 border-black p-4 rounded-2xl bg-gray-50 flex flex-col justify-between">
-        <h4 class="text-sm font-black border-b-2 border-black pb-1 mb-2">🌡️ Temperaturas</h4>
+      <section class="border-4 border-black p-3.5 rounded-2xl bg-gray-50">
+        <h4 class="text-xs font-black border-b-2 border-black pb-1 mb-1.5 uppercase">🌡️ Temperaturas</h4>
         <div id="room-temperatures" class="grid grid-cols-2 gap-2 text-xs font-bold">
           <div>Sala: <span class="font-black text-sm" id="temp-sala">--°C</span></div>
           <div>Quarto: <span class="font-black text-sm" id="temp-quarto">--°C</span></div>
@@ -124,30 +129,28 @@
 
   </main>
 
-  <!-- MÓDULO 4: PREVISÃO DO TEMPO (5 DIAS) -->
+  <!-- 4. LISTA DE COMPRAS ALEXA (ABAIXO, NA PARTE INFERIOR) -->
   <section class="border-4 border-black p-4 rounded-2xl my-2">
-    <div class="flex justify-between items-center border-b-2 border-black pb-1 mb-3">
-      <h3 class="text-base font-black uppercase">📅 Previsão do Tempo (Próximos 5 Dias)</h3>
-      <span class="text-xs font-bold">Irradiância Solar: <strong id="env-irrad">-- W/m²</strong></span>
+    <div class="flex justify-between items-center border-b-2 border-black pb-1 mb-2">
+      <h3 class="text-sm font-black uppercase flex items-center gap-2">
+        <span>🛒</span> Lista de Compras (Alexa)
+      </h3>
+      <span class="text-xs text-gray-600 font-bold">Diga: "Alexa, adicione [item] na lista"</span>
     </div>
 
-    <div id="weather-forecast" class="grid grid-cols-5 gap-4 text-center">
-      <!-- Os cards de previsão serão inseridos dinamicamente aqui -->
-      <div class="border-2 border-black p-2 rounded-xl">
-        <p class="font-black text-sm">---</p>
-        <p class="text-2xl my-1">☀️</p>
-        <p class="font-extrabold text-sm">--° / --°</p>
-      </div>
-    </div>
+    <!-- Exibição em até 2 colunas para caber mais itens horizontalmente -->
+    <ul id="shopping-list" class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm font-bold my-1">
+      <li class="flex items-center border-b border-gray-200 pb-0.5"><span class="mr-2 text-base">☐</span> Carregando lista...</li>
+    </ul>
   </section>
 
-  <!-- RODAPÉ -->
+  <!-- 5. RODAPÉ -->
   <footer class="flex justify-between items-center border-t-2 border-black pt-2 text-xs font-bold tracking-wider">
     <span>TRMNL OS • HOME DISPLAY HUB</span>
     <span>ÚLTIMA SINCRONIZAÇÃO: <span id="last-update">--:--:--</span></span>
   </footer>
 
-  <!-- SCRIPT DE CARREGAMENTO -->
+  <!-- SCRIPT -->
   <script>
     async function carregarDados() {
       try {
@@ -156,7 +159,7 @@
         
         const data = await resposta.json();
 
-        // 1. Atualiza Fechadura Eletrônica
+        // 1. Fechadura Eletrônica
         const lockBadge = document.getElementById('lock-badge');
         const lockIcon = document.getElementById('lock-icon');
         const lockText = document.getElementById('lock-text');
@@ -171,29 +174,31 @@
           lockText.innerText = "FECHADURA: ABERTA";
         }
 
-        // 2. Atualiza Usina Solar
+        // 2. Previsão do Tempo (5 Dias)
+        const forecastContainer = document.getElementById('weather-forecast');
+        if (data.previsao && data.previsao.length >= 5) {
+          forecastContainer.innerHTML = data.previsao.slice(0, 5).map(dia => `
+            <div class="border-2 border-black p-1.5 rounded-xl bg-white">
+              <p class="font-black text-xs uppercase">${dia.dia}</p>
+              <p class="text-xl my-0.5">${dia.icone}</p>
+              <p class="font-black text-xs">${dia.max}° / <span class="text-gray-600">${dia.min}°</span></p>
+            </div>
+          `).join('');
+        }
+
+        // 3. Usina Solar
         document.getElementById('solar-power').innerText = data.usina.potencia;
         document.getElementById('solar-today').innerText = data.usina.geracao_hoje;
         document.getElementById('solar-cota').innerText = data.usina.cota_6;
         document.getElementById('solar-total').innerText = data.usina.total_acumulado;
 
-        // 3. Atualiza Lista de Compras
-        const listContainer = document.getElementById('shopping-list');
-        if (data.lista_compras && data.lista_compras.length > 0) {
-          listContainer.innerHTML = data.lista_compras.slice(0, 6).map(item => 
-            `<li class="flex items-center border-b border-gray-300 pb-1"><span class="mr-2 text-lg">☐</span> ${item}</li>`
-          ).join('');
-        } else {
-          listContainer.innerHTML = '<li class="text-gray-500">Nenhum item na lista</li>';
-        }
-
-        // 4. Atualiza BYD Song Pro
+        // 4. BYD Song Pro
         document.getElementById('byd-soc').innerText = data.byd.bateria;
         document.getElementById('byd-bar').style.width = data.byd.bateria;
         document.getElementById('byd-status').innerText = '⚡ Status: ' + data.byd.status;
         document.getElementById('byd-range').innerText = '🔋 Autonomia EV: ' + data.byd.autonomia_ev;
 
-        // 5. Atualiza Temperaturas dos Cômodos
+        // 5. Temperaturas dos Cômodos
         if (data.temperaturas) {
           document.getElementById('temp-sala').innerText = data.temperaturas.sala + '°C';
           document.getElementById('temp-quarto').innerText = data.temperaturas.quarto + '°C';
@@ -202,16 +207,14 @@
         document.getElementById('env-temp').innerText = data.ambiente.temperatura + '°C';
         document.getElementById('env-irrad').innerText = data.ambiente.irradiancia;
 
-        // 6. Atualiza Previsão do Tempo (5 Dias)
-        const forecastContainer = document.getElementById('weather-forecast');
-        if (data.previsao && data.previsao.length >= 5) {
-          forecastContainer.innerHTML = data.previsao.slice(0, 5).map(dia => `
-            <div class="border-2 border-black p-2 rounded-xl bg-gray-50">
-              <p class="font-black text-xs uppercase">${dia.dia}</p>
-              <p class="text-2xl my-1">${dia.icone}</p>
-              <p class="font-black text-xs">${dia.max}° / <span class="text-gray-600">${dia.min}°</span></p>
-            </div>
-          `).join('');
+        // 6. Lista de Compras (Grid de 2 Colunas para caber mais itens)
+        const listContainer = document.getElementById('shopping-list');
+        if (data.lista_compras && data.lista_compras.length > 0) {
+          listContainer.innerHTML = data.lista_compras.slice(0, 8).map(item => 
+            `<li class="flex items-center border-b border-gray-200 pb-0.5"><span class="mr-2 text-base">☐</span> ${item}</li>`
+          ).join('');
+        } else {
+          listContainer.innerHTML = '<li class="text-gray-500 col-span-2">Nenhum item na lista</li>';
         }
 
         // 7. Timestamps
