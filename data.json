@@ -1,0 +1,18 @@
+{
+  "usina": {
+    "potencia": "0.00",
+    "geracao_hoje": "151.50",
+    "cota_6": "9.09",
+    "total_acumulado": "4.95"
+  },
+  "byd": {
+    "bateria": "78%",
+    "status": "Pronto para Carga",
+    "autonomia_ev": "55 km"
+  },
+  "ambiente": {
+    "irradiancia": "0 W/m²",
+    "temperatura": "20 °C"
+  },
+  "atualizado_em": "22/07/2026 - 22:15"
+}
