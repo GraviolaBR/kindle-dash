@@ -66,7 +66,8 @@ while true; do
     # acordar o navegador segue aberto e a própria página se recarrega:
     # reabrir aqui fazia a tela inicial do Kindle piscar.
     # (PID do navegador do painel, não do navegador da Amazon, que tem o mesmo nome)
-    if ! kill -0 "$(cat /tmp/kdash-navegador.pid 2>/dev/null)" 2>/dev/null; then
+    NAV=$(cat /tmp/kdash-navegador.pid 2>/dev/null)
+    if [ -z "$NAV" ] || ! kill -0 "$NAV" 2>/dev/null; then
         /mnt/us/kdash/painel.sh /
         log "painel aberto"
     else
