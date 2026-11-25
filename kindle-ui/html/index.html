@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Painel Casa</title>
+<!--
+  Painel do Kindle (Paperwhite 4, firmware 5.17: Chromium 75, janela 536x724
+  CSS px, dpr 2). E-ink: só preto e branco, sem animação, alvos de toque
+  grandes. Sem ?. nem ?? (Chrome 80+).
+  Dados: GET /api/states/<entidade> e POST /api/services/script/<script>,
+  repassados ao HA pelo nginx (kindle-ui), que põe o token e só libera a lista
+  do nginx.conf.template.
+-->
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #000; }
+  body { font-family: "Bookerly", "Amazon Ember", sans-serif; width: 536px; height: 724px; overflow: hidden; padding: 8px 10px; }
+  .topo { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; font-size: 17px; }
+  .topo .hora { font-size: 26px; font-weight: bold; }
+  .cadeado { border: 2px solid #000; border-radius: 8px; padding: 3px 8px; font-size: 15px; font-weight: bold; }
+  .bloco { border: 2px solid #000; border-radius: 10px; margin-top: 8px; padding: 6px 10px 9px; }
+  .titulo { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
+  .titulo span + span { font-weight: normal; text-transform: none; letter-spacing: 0; }
+  .linha { display: flex; align-items: baseline; gap: 14px; margin: 2px 0 4px; }
+  .grande { font-size: 40px; font-weight: bold; line-height: 1.05; }
+  .medio { font-size: 22px; font-weight: bold; }
+  .pequeno { font-size: 15px; }
+  .botoes { display: flex; gap: 6px; margin-top: 4px; }
+  .botoes button { flex: 1; }
+  button { font: inherit; font-size: 16px; font-weight: bold; background: #fff; color: #000; border: 2px solid #000; border-radius: 8px; height: 58px; padding: 0 4px; }
+  button.ativo { background: #000; color: #fff; }
+  .cols { display: flex; gap: 7px; }
+  .cols .bloco { flex: 1; }
+  .rodape { position: absolute; left: 10px; right: 10px; bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; }
+  body.dormindo .botoes, body.dormindo .so-acordado { display: none; }
+  .aviso { font-size: 15px; font-weight: bold; }
+</style>
+</head>
+<body>
+  <div class="topo">
+    <div><span class="hora" id="hora">--:--</span> <span id="data"></span></div>
+    <div id="clima"></div>
+    <div class="cadeado" id="cadeado">AO VIVO</div>
+  </div>
+
+  <div class="bloco">
+    <div class="titulo"><span>Carro</span><span id="carro-quando"></span></div>
+    <div class="linha">
+      <span class="grande" id="carro-bat">--%</span>
+      <span class="medio" id="carro-km">-- km</span>
+    </div>
+    <div class="pequeno" id="carro-status">&nbsp;</div>
+    <div class="botoes">
+      <button data-script="byd_ligar_ar" data-dados='{"temperatura":22}' data-confirma="Ligar o ar do carro em 22 °C?">Ligar ar</button>
+      <button data-script="byd_desligar_ar">Desligar ar</button>
+      <button data-script="byd_travar" data-confirma="Travar o carro?">Travar</button>
+      <button data-script="byd_atualizar">Atualizar</button>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="bloco">
+      <div class="titulo"><span>Usina André</span></div>
+      <div class="grande" id="usina-kw">--</div>
+      <div class="pequeno" id="usina-cota">&nbsp;</div>
+      <div class="pequeno" id="usina-media">&nbsp;</div>
+    </div>
+    <div class="bloco">
+      <div class="titulo"><span>Vendas hoje</span></div>
+      <div class="grande" id="vendas">--</div>
+      <div class="pequeno" id="vendas-det">&nbsp;</div>
+    </div>
+  </div>
+
+  <div class="bloco">
+    <div class="titulo"><span>TV da sala</span><span id="tv-sala"></span></div>
+    <div class="botoes">
+      <button data-script="cnn_tv_sala">CNN</button>
+      <button data-script="pausar_sala">Pausar</button>
+      <button data-script="continuar_sala">Continuar</button>
+      <button data-script="kindle_tv_sala_desligar">Desligar</button>
+    </div>
+  </div>
+
+  <div class="bloco">
+    <div class="titulo"><span>TV do quarto</span><span id="tv-quarto"></span></div>
+    <div class="botoes">
+      <button data-script="cnn_tv_quarto">CNN</button>
+      <button data-script="kindle_tv_quarto_desligar">Desligar</button>
+    </div>
+  </div>
+
+  <div class="bloco so-acordado">
+    <div class="titulo"><span>Echo fala</span></div>
+    <div class="botoes">
+      <button data-script="falar_carga_carro">Carga do carro</button>
+      <button data-script="falar_vendas_hoje">Vendas de hoje</button>
+    </div>
+  </div>
+
+  <div class="rodape">
+    <span id="msg">&nbsp;</span>
+    <span>Kindle <span id="kbat">--</span>% · <span id="atualizado">--</span></span>
+  </div>
+
+<script>
+'use strict';
+var DORMINDO = location.pathname.indexOf('/dormir') === 0;
+if (DORMINDO) document.body.className = 'dormindo';
+
+var CLIMA = { 'sunny': 'Sol', 'clear-night': 'Céu limpo', 'partlycloudy': 'Parc. nublado',
+  'cloudy': 'Nublado', 'rainy': 'Chuva', 'pouring': 'Chuva forte', 'lightning': 'Trovoadas',
+  'lightning-rainy': 'Tempestade', 'fog': 'Neblina', 'windy': 'Vento', 'windy-variant': 'Vento' };
+var DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+function $(id) { return document.getElementById(id); }
+function txt(id, s) { $(id).textContent = s; }
+function num(v) { var n = parseFloat(v); return isNaN(n) ? null : n; }
+function br(n, casas) { return n.toFixed(casas).replace('.', ','); }
+function milhar(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function dois(n) { return (n < 10 ? '0' : '') + n; }
+
+function pegar(ent) {
+  return fetch('/api/states/' + ent, { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; });
+}
+
+function relogio() {
+  var d = new Date();
+  txt('hora', dois(d.getHours()) + ':' + dois(d.getMinutes()));
+  txt('data', DIAS[d.getDay()] + ' ' + dois(d.getDate()) + '/' + dois(d.getMonth() + 1));
+}
+
+// Média do ciclo da usina: dias fechados desde o dia 18 (mesma conta do painel do HA).
+function mediaCiclo(dias) {
+  if (!dias || !dias.length) return null;
+  var hoje = new Date(), ini = new Date(hoje.getFullYear(), hoje.getMonth(), 18);
+  if (hoje.getDate() < 18) ini = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 18);
+  var hojeIso = hoje.getFullYear() + '-' + dois(hoje.getMonth() + 1) + '-' + dois(hoje.getDate());
+  var iniIso = ini.getFullYear() + '-' + dois(ini.getMonth() + 1) + '-' + dois(ini.getDate());
+  var soma = 0, n = 0;
+  dias.forEach(function (d) {
+    if (d.data >= iniIso && d.data < hojeIso && num(d.kwh) !== null) { soma += num(d.kwh); n++; }
+  });
+  return n ? soma / n : null;
+}
+
+function atualizar() {
+  relogio();
+  var ents = ['sensor.byd_bateria', 'sensor.byd_autonomia', 'binary_sensor.byd_trava',
+    'binary_sensor.byd_carregando', 'binary_sensor.byd_cabo_conectado', 'sensor.byd_potencia_de_carga',
+    'sensor.byd_dados_do_carro_em', 'sensor.usina_potencia', 'sensor.usina_cota_6',
+    'sensor.usina_cotas_recentes', 'sensor.vendas_hoje', 'sensor.vendas_cupons',
+    'sensor.vendas_ticket_medio', 'media_player.tv_sala', 'media_player.tv_quarto',
+    'weather.casa', 'sensor.kindle_bateria'];
+  return Promise.all(ents.map(pegar)).then(function (r) {
+    var s = {};
+    ents.forEach(function (e, i) { s[e] = r[i]; });
+    function st(e) { return s[e] ? s[e].state : null; }
+
+    var bat = num(st('sensor.byd_bateria')), km = num(st('sensor.byd_autonomia'));
+    txt('carro-bat', bat === null ? '--%' : Math.round(bat) + '%');
+    txt('carro-km', km === null ? '-- km' : Math.round(km) + ' km');
+    var partes = [st('binary_sensor.byd_trava') === 'on' ? 'DESTRAVADO' : 'Travado'];
+    if (st('binary_sensor.byd_carregando') === 'on') {
+      var kw = num(st('sensor.byd_potencia_de_carga'));
+      partes.push('Carregando' + (kw ? ' ' + br(kw, 1) + ' kW' : ''));
+    } else if (st('binary_sensor.byd_cabo_conectado') === 'on') {
+      partes.push('Cabo ligado');
+    }
+    txt('carro-status', partes.join(' · '));
+    var quando = st('sensor.byd_dados_do_carro_em');
+    if (quando && quando !== 'unknown' && quando !== 'unavailable') {
+      var q = new Date(quando);
+      txt('carro-quando', 'dados de ' + dois(q.getDate()) + '/' + dois(q.getMonth() + 1) + ' ' + dois(q.getHours()) + ':' + dois(q.getMinutes()));
+    }
+
+    var pot = num(st('sensor.usina_potencia'));
+    txt('usina-kw', pot === null ? '--' : (pot > 0 ? br(pot, 1) + ' kW' : 'Em espera'));
+    var cota = num(st('sensor.usina_cota_6'));
+    txt('usina-cota', cota === null ? '' : 'Hoje ' + br(cota, 1) + ' kWh');
+    var cr = s['sensor.usina_cotas_recentes'];
+    var media = cr && cr.attributes ? mediaCiclo(cr.attributes.dias) : null;
+    txt('usina-media', media === null ? '' : 'Média do ciclo ' + br(media, 1) + ' kWh');
+
+    var v = num(st('sensor.vendas_hoje'));
+    txt('vendas', v === null ? '--' : 'R$ ' + milhar(v));
+    var cup = num(st('sensor.vendas_cupons')), tk = num(st('sensor.vendas_ticket_medio'));
+    txt('vendas-det', (cup === null ? '' : milhar(cup) + ' cupons') + (tk === null ? '' : ' · tíquete R$ ' + br(tk, 2)));
+
+    function tv(e) { var x = st(e); return x === 'on' || x === 'playing' || x === 'paused' ? 'ligada' : (x === null || x === 'unavailable' ? 'desligada' : x === 'off' ? 'desligada' : x); }
+    txt('tv-sala', tv('media_player.tv_sala'));
+    txt('tv-quarto', tv('media_player.tv_quarto'));
+
+    var w = s['weather.casa'];
+    if (w) txt('clima', (CLIMA[w.state] || w.state) + (w.attributes && w.attributes.temperature !== undefined ? ' · ' + Math.round(w.attributes.temperature) + '°' : ''));
+
+    var kb = st('sensor.kindle_bateria');
+    txt('kbat', kb === null ? '--' : kb);
+    var d = new Date();
+    txt('atualizado', dois(d.getHours()) + ':' + dois(d.getMinutes()));
+  });
+}
+
+var ocupado = false;
+function chamar(btn) {
+  if (ocupado || DORMINDO) return;
+  var conf = btn.getAttribute('data-confirma');
+  if (conf && !window.confirm(conf)) return;
+  ocupado = true;
+  btn.className = 'ativo';
+  txt('msg', btn.textContent + '…');
+  fetch('/api/services/script/' + btn.getAttribute('data-script'), {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: btn.getAttribute('data-dados') || '{}'
+  }).then(function (r) {
+    txt('msg', r.ok ? btn.textContent + ': feito' : btn.textContent + ': erro ' + r.status);
+  }).catch(function () {
+    txt('msg', btn.textContent + ': sem conexão');
+  }).then(function () {
+    btn.className = '';
+    ocupado = false;
+    setTimeout(atualizar, 3000);
+  });
+}
+
+Array.prototype.forEach.call(document.querySelectorAll('button[data-script]'), function (b) {
+  b.addEventListener('click', function () { chamar(b); });
+});
+
+// Cadeado: AO VIVO → toque pede pro Kindle dormir (o job de sono no Kindle
+// consulta input_boolean.kindle_dormir a cada 5 s).
+$('cadeado').addEventListener('click', function () {
+  if (DORMINDO) return;
+  txt('cadeado', 'DORMINDO…');
+  fetch('/api/services/script/kindle_dormir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+});
+if (DORMINDO) {
+  txt('cadeado', 'DORMINDO');
+  txt('msg', 'Aperte o botão de ligar para acordar');
+}
+
+atualizar();
+if (!DORMINDO) {
+  setInterval(atualizar, 60000);
+  // Ao acordar da suspensão os timers continuam de onde pararam: um relógio
+  // de 3 s percebe o salto e atualiza na hora.
+  var ultimo = Date.now();
+  setInterval(function () {
+    var agora = Date.now();
+    if (agora - ultimo > 20000) atualizar();
+    ultimo = agora;
+  }, 3000);
+}
+</script>
+</body>
+</html>

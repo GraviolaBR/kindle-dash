@@ -1,0 +1,18 @@
+# kindle-ui: nginx que serve a página do Kindle e repassa à API do Home
+# Assistant (que já roda no servidor) só o que a página usa, com o token
+# colocado aqui. network_mode host + regra no ufw (com "ports:" o Docker pula
+# o ufw, e o servidor tem IPv6 público).
+services:
+  kindle-ui:
+    image: nginx:1.27-alpine
+    container_name: kindle-ui
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      KINDLE_HA_TOKEN: ${KINDLE_HA_TOKEN}
+      HA_URL: ${HA_URL:-http://127.0.0.1:8123}
+      # só estas duas são substituídas no template (o resto do nginx usa $)
+      NGINX_ENVSUBST_FILTER: "^(KINDLE_HA_TOKEN|HA_URL)$"
+    volumes:
+      - ./kindle-ui/html:/usr/share/nginx/html:ro
+      - ./kindle-ui/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro

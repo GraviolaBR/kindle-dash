@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "name": "Painel Casa",
+      "priority": -5,
+      "items": [
+        { "name": "Iniciar painel", "priority": 1, "action": "bin/iniciar.sh" },
+        { "name": "Parar painel (volta ao Kindle normal)", "priority": 2, "action": "bin/parar.sh" },
+        { "name": "Não dormir (na tomada)", "priority": 3, "action": "bin/nao_dormir.sh", "params": "ligar" },
+        { "name": "Voltar a dormir sozinho", "priority": 4, "action": "bin/nao_dormir.sh", "params": "desligar" }
+      ]
+    }
+  ]
+}

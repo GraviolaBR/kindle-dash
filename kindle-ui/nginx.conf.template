@@ -1,0 +1,55 @@
+# Proxy entre o Kindle e o Home Assistant (container kindle-ui, network_mode host).
+#
+# O token de longa duração do HA fica só aqui (variável KINDLE_HA_TOKEN no .env
+# do servidor) e é colocado no cabeçalho pelo nginx: o Kindle nunca vê o token.
+# Por isso o proxy NÃO repassa a API inteira: só libera ler as entidades que a
+# página mostra, chamar os scripts da lista e gravar a bateria do Kindle.
+# Qualquer outra rota /api/ devolve 403. Ao pôr um botão ou sensor novo na
+# página, inclua aqui também.
+
+server {
+    listen 8124;
+    server_tokens off;
+
+    # Leitura dos estados mostrados na página.
+    location ~ ^/api/states/(sensor\.(byd|usina|vendas)_[a-z0-9_]+|binary_sensor\.byd_[a-z0-9_]+|media_player\.(tv_sala|tv_quarto)|weather\.casa|input_boolean\.kindle_dormir)$ {
+        limit_except GET { deny all; }
+        proxy_pass ${HA_URL};
+        proxy_set_header Authorization "Bearer ${KINDLE_HA_TOKEN}";
+        proxy_read_timeout 10s;
+    }
+
+    # Bateria do Kindle: o job de sono grava (POST) e a página lê (GET).
+    location = /api/states/sensor.kindle_bateria {
+        limit_except GET POST { deny all; }
+        proxy_pass ${HA_URL};
+        proxy_set_header Authorization "Bearer ${KINDLE_HA_TOKEN}";
+        proxy_set_header Content-Type "application/json";
+        proxy_read_timeout 10s;
+    }
+
+    # Botões: só os scripts da lista (todos já existem no HA; os kindle_* estão
+    # em packages/kindle.yaml do repositório homeassistant).
+    location ~ ^/api/services/script/(byd_ligar_ar|byd_desligar_ar|byd_travar|byd_atualizar|falar_carga_carro|falar_vendas_hoje|cnn_tv_sala|cnn_tv_quarto|pausar_sala|continuar_sala|kindle_[a-z0-9_]+)$ {
+        limit_except POST { deny all; }
+        proxy_pass ${HA_URL};
+        proxy_set_header Authorization "Bearer ${KINDLE_HA_TOKEN}";
+        proxy_set_header Content-Type "application/json";
+        proxy_read_timeout 15s;
+    }
+
+    location /api/ {
+        return 403;
+    }
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+        # /dormir é a mesma página, na versão "dormindo" (o job de sono abre
+        # antes de suspender, pra imagem congelada na tela dizer a verdade).
+        try_files $uri $uri/ /index.html;
+        # Sem cache: o navegador do Kindle reaproveita páginas antigas.
+        add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+        expires -1;
+    }
+}

@@ -1,0 +1,31 @@
+# Deploy no servidor caseiro (runner self-hosted "servidor", em /opt/actions-runner/kindle-dash).
+# Push na main → copia pra /srv/apps/kindle-dash (o .env de lá fica) → sobe o kindle-ui.
+# A página (kindle-ui/html) é montada no container: muda na hora, sem reiniciar.
+# A parte do Kindle (pasta kindle/) não vai por aqui: roda kindle/instalar.sh do Mac.
+name: deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency: deploy
+jobs:
+  deploy:
+    runs-on: [self-hosted, servidor]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copiar
+        run: rsync -a --delete --exclude .git --exclude .github --exclude .env ./ /srv/apps/kindle-dash/
+      - name: Subir
+        working-directory: /srv/apps/kindle-dash
+        run: |
+          test -s .env || { echo "falta /srv/apps/kindle-dash/.env com KINDLE_HA_TOKEN"; exit 1; }
+          docker compose up -d
+          docker compose exec -T kindle-ui nginx -t
+          docker compose exec -T kindle-ui nginx -s reload
+      - name: Conferir
+        run: |
+          sleep 3
+          test "$(docker inspect -f '{{.State.Running}}' kindle-ui)" = true
+          curl -fsS -o /dev/null http://127.0.0.1:8124/
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8124/api/states/weather.casa)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8124/api/config)" = 403

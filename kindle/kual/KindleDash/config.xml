@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension>
+  <information>
+    <name>Painel Casa</name>
+    <version>1.0</version>
+    <author>GraviolaBR</author>
+    <id>KindleDash</id>
+  </information>
+  <menus>
+    <menu type="json" dynamic="false">menu.json</menu>
+  </menus>
+</extension>
