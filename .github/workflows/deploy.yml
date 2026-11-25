@@ -19,9 +19,12 @@ jobs:
         working-directory: /srv/apps/kindle-dash
         run: |
           test -s .env || { echo "falta /srv/apps/kindle-dash/.env com KINDLE_HA_TOKEN"; exit 1; }
+          # o template do nginx só é processado na partida do container: reiniciar
+          # (reload não pega mudança no nginx.conf.template)
           docker compose up -d
+          docker compose restart kindle-ui
+          sleep 2
           docker compose exec -T kindle-ui nginx -t
-          docker compose exec -T kindle-ui nginx -s reload
       - name: Conferir
         run: |
           sleep 3
@@ -29,3 +32,5 @@ jobs:
           curl -fsS -o /dev/null http://127.0.0.1:8124/
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8124/api/states/weather.casa)" = 200
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8124/api/config)" = 403
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'http://127.0.0.1:8124/api/history/period/2026-01-01T00:00:00Z?filter_entity_id=sensor.usina_potencia&minimal_response&no_attributes')" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'http://127.0.0.1:8124/api/history/period/2026-01-01T00:00:00Z?filter_entity_id=lock.x&minimal_response&no_attributes')" = 403
