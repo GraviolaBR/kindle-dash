@@ -15,6 +15,8 @@ killall kindle_browser >/dev/null 2>&1
 sleep 1
 
 export DISPLAY=:0
+# o Kindle roda em UTC; sem isto a hora da página sai +3 h
+export TZ="<-03>3"
 export XDG_CONFIG_HOME=/mnt/us/kdash/perfil/
 export LD_LIBRARY_PATH=/mnt/us/kdash/chromium/bin:/usr/bin/chromium/lib:/usr/bin/chromium/usr/lib:/usr/lib/
 

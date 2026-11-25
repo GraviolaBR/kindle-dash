@@ -7,7 +7,7 @@
 <!--
   Painel do Kindle (Paperwhite 4, firmware 5.17: Chromium 75, janela 536x724
   CSS px, dpr 2). E-ink: só preto e branco, sem animação, alvos de toque
-  grandes. Sem ?. nem ?? (Chrome 80+).
+  grandes. Sem ?. nem ?? (Chrome 80+) e sem gap em flex (Chrome 84+).
   Dados: GET /api/states/<entidade> e POST /api/services/script/<script>,
   repassados ao HA pelo nginx (kindle-ui), que põe o token e só libera a lista
   do nginx.conf.template.
@@ -15,22 +15,25 @@
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: #fff; color: #000; }
-  body { font-family: "Bookerly", "Amazon Ember", sans-serif; width: 536px; height: 724px; overflow: hidden; padding: 8px 10px; }
+  body { font-family: "Amazon Ember", "Helvetica Neue", Arial, sans-serif; width: 536px; height: 724px; overflow: hidden; padding: 8px 10px; }
   .topo { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; font-size: 17px; }
   .topo .hora { font-size: 26px; font-weight: bold; }
   .cadeado { border: 2px solid #000; border-radius: 8px; padding: 3px 8px; font-size: 15px; font-weight: bold; }
   .bloco { border: 2px solid #000; border-radius: 10px; margin-top: 8px; padding: 6px 10px 9px; }
   .titulo { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
   .titulo span + span { font-weight: normal; text-transform: none; letter-spacing: 0; }
-  .linha { display: flex; align-items: baseline; gap: 14px; margin: 2px 0 4px; }
+  .linha { display: flex; align-items: baseline; margin: 2px 0 4px; }
+  .linha span + span { margin-left: 14px; }
   .grande { font-size: 40px; font-weight: bold; line-height: 1.05; }
   .medio { font-size: 22px; font-weight: bold; }
   .pequeno { font-size: 15px; }
-  .botoes { display: flex; gap: 6px; margin-top: 4px; }
+  .botoes { display: flex; margin-top: 4px; }
+  .botoes button + button { margin-left: 6px; }
   .botoes button { flex: 1; }
   button { font: inherit; font-size: 16px; font-weight: bold; background: #fff; color: #000; border: 2px solid #000; border-radius: 8px; height: 58px; padding: 0 4px; }
   button.ativo { background: #000; color: #fff; }
-  .cols { display: flex; gap: 7px; }
+  .cols { display: flex; }
+  .cols .bloco + .bloco { margin-left: 7px; }
   .cols .bloco { flex: 1; }
   .rodape { position: absolute; left: 10px; right: 10px; bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; }
   body.dormindo .botoes, body.dormindo .so-acordado { display: none; }
