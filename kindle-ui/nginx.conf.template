@@ -19,6 +19,16 @@ server {
         proxy_read_timeout 10s;
     }
 
+    # Histórico do dia da potência da usina (gráfico da página). Só essa
+    # entidade e só nesse formato; qualquer outro filtro dá 403.
+    location ~ ^/api/history/period/[0-9T:.Z+-]+$ {
+        limit_except GET { deny all; }
+        if ($args != "filter_entity_id=sensor.usina_potencia&minimal_response&no_attributes") { return 403; }
+        proxy_pass ${HA_URL};
+        proxy_set_header Authorization "Bearer ${KINDLE_HA_TOKEN}";
+        proxy_read_timeout 10s;
+    }
+
     # Bateria do Kindle: o job de sono grava (POST) e a página lê (GET).
     location = /api/states/sensor.kindle_bateria {
         limit_except GET POST { deny all; }
