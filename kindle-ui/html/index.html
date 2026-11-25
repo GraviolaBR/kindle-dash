@@ -111,8 +111,12 @@
 
 <script>
 'use strict';
-var DORMINDO = location.pathname.indexOf('/dormir') === 0;
-if (DORMINDO) document.body.className = 'dormindo';
+// Modo "dormindo": a própria página se troca pra versão sem botões pouco antes
+// do Kindle suspender (o e-ink congela essa imagem). Entra no toque do cadeado
+// ou depois de DORMIR_EM ms sem toque — 10 s antes do OCIOSO do sono.sh (180 s).
+// /dormir abre direto nesse modo (só pra testar).
+var DORMIR_EM = 170000;
+var DORMINDO = false;
 
 var CLIMA = { 'sunny': 'Sol', 'clear-night': 'Céu limpo', 'partlycloudy': 'Parc. nublado',
   'cloudy': 'Nublado', 'rainy': 'Chuva', 'pouring': 'Chuva forte', 'lightning': 'Trovoadas',
@@ -211,7 +215,7 @@ function atualizar() {
 
 var ocupado = false;
 function chamar(btn) {
-  if (ocupado || DORMINDO) return;
+  if (ocupado) return;
   var conf = btn.getAttribute('data-confirma');
   if (conf && !window.confirm(conf)) return;
   ocupado = true;
@@ -237,11 +241,28 @@ Array.prototype.forEach.call(document.querySelectorAll('button[data-script]'), f
 
 // Cadeado: AO VIVO → toque pede pro Kindle dormir (o job de sono no Kindle
 // consulta input_boolean.kindle_dormir a cada 5 s).
-$('cadeado').addEventListener('click', function () {
+function dormir(sim) {
+  DORMINDO = sim;
+  document.body.className = sim ? 'dormindo' : '';
+  txt('cadeado', sim ? 'DORMINDO' : 'AO VIVO');
+  txt('msg', sim ? 'Aperte o botão de ligar para acordar' : '\u00a0');
+}
+$('cadeado').addEventListener('click', function (ev) {
+  ev.stopPropagation();
   if (DORMINDO) return;
-  txt('cadeado', 'DORMINDO…');
+  dormir(true);
   fetch('/api/services/script/kindle_dormir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
 });
+// qualquer toque: zera o tempo; se estava "dormindo" (o Kindle ainda não
+// suspendeu), volta ao vivo
+var ultimoToque = Date.now();
+document.addEventListener('click', function () {
+  ultimoToque = Date.now();
+  if (DORMINDO) { dormir(false); atualizar(); }
+}, true);
+setInterval(function () {
+  if (!DORMINDO && Date.now() - ultimoToque > DORMIR_EM) dormir(true);
+}, 5000);
 // Sair: o Kindle fecha o painel e volta à tela normal (sono.sh consulta
 // input_boolean.kindle_sair). Pra voltar: KUAL → Painel Casa → Iniciar painel.
 $('sair').addEventListener('click', function () {
@@ -249,10 +270,7 @@ $('sair').addEventListener('click', function () {
   txt('msg', 'Saindo…');
   fetch('/api/services/script/kindle_sair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
 });
-if (DORMINDO) {
-  txt('cadeado', 'DORMINDO');
-  txt('msg', 'Aperte o botão de ligar para acordar');
-}
+if (location.pathname.indexOf('/dormir') === 0) dormir(true);
 
 // Redesenho completo pouco depois de abrir: as barras da Amazon somem depois
 // que a página já foi pintada e deixam uma faixa branca no topo (o Chromium do
@@ -267,17 +285,7 @@ setTimeout(repintar, 4000);
 setTimeout(repintar, 10000);
 
 atualizar();
-if (!DORMINDO) {
-  setInterval(atualizar, 60000);
-  // Ao acordar da suspensão os timers continuam de onde pararam: um relógio
-  // de 3 s percebe o salto e atualiza na hora.
-  var ultimo = Date.now();
-  setInterval(function () {
-    var agora = Date.now();
-    if (agora - ultimo > 20000) atualizar();
-    ultimo = agora;
-  }, 3000);
-}
+setInterval(function () { if (!DORMINDO) atualizar(); }, 60000);
 </script>
 </body>
 </html>

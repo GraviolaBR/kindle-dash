@@ -21,14 +21,17 @@ Kindle (Wi-Fi WINDSOR, 192.168.18.183)          Servidor (bagshotserver, 192.168
    ├ abre o painel, espera 3 min sem toque          (token posto pelo nginx)
    ├ consulta input_boolean.kindle_dormir / kindle_sair
    ├ envia sensor.kindle_bateria (~1 min)
-   └ mostra /dormir, arma o despertador, suspende
+   └ arma o despertador e suspende (a página já trocou pra "DORMINDO")
 ```
 
 - **Página** (`kindle-ui/html/index.html`): um HTML só, preto e branco, alvos
   grandes, 536×724 px CSS (tela 1072×1448 com escala 2). Lê
   `/api/states/<entidade>` e chama `/api/services/script/<script>`. Atualiza a
-  cada 1 min acordado e 3 s depois de cada toque. `/dormir` é a mesma página sem
-  botões e com o cadeado "DORMINDO", aberta antes de suspender.
+  cada 1 min acordado e 3 s depois de cada toque. Com 170 s sem toque (ou no
+  toque do cadeado) a própria página passa pro modo "DORMINDO", sem botões; o
+  `sono.sh` suspende aos 180 s e o e-ink congela essa imagem. (Reabrir o
+  navegador em `/dormir` antes de suspender não dava tempo de desenhar: a tela
+  ficava em branco. `/dormir` continua existindo só pra teste.)
 - **Proxy** (`kindle-ui/nginx.conf.template`): o token de longa duração do HA
   fica só no `.env` do servidor. O nginx **não** repassa a API inteira: só ler
   as entidades da página, chamar os scripts da lista e gravar a bateria do

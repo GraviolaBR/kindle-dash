@@ -86,9 +86,10 @@ while true; do
     done
     [ -f /mnt/us/DESLIGAR_PAINEL ] && continue
 
-    # imagem "dormindo" e suspensão
-    /mnt/us/kdash/painel.sh /dormir
-    sleep 8
+    # A página já se trocou sozinha pra versão "dormindo" (cadeado ou 170 s sem
+    # toque); espera o e-ink terminar de desenhar e suspende. Ao acordar o
+    # painel é reaberto do zero (dados novos).
+    sleep 4
     echo 0 > $RTC/wakealarm 2>/dev/null
     echo +$DESPERTADOR > $RTC/wakealarm 2>/dev/null
     log "suspendendo"
