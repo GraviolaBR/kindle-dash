@@ -33,6 +33,10 @@ Kindle (Wi-Fi WINDSOR, 192.168.18.183)          Servidor (bagshotserver, 192.168
   `sono.sh` suspende aos 180 s e o e-ink congela essa imagem. (Reabrir o
   navegador em `/dormir` antes de suspender não dava tempo de desenhar: a tela
   ficava em branco. `/dormir` continua existindo só pra teste.)
+- **Usina**: kW com sol quando gera, "Em espera" parada de dia e lua com
+  estrelas à noite (18h–6h); gráfico da potência de hoje (05h–19h, linha
+  pontilhada às 12h), do `/api/history` do HA — o proxy só libera o histórico
+  de `sensor.usina_potencia`, nesse formato exato.
 - **Proxy** (`kindle-ui/nginx.conf.template`): o token de longa duração do HA
   fica só no `.env` do servidor. O nginx **não** repassa a API inteira: só ler
   as entidades da página, chamar os scripts da lista e gravar a bateria do
@@ -130,6 +134,9 @@ sozinho. Sem o servidor respondendo, ele mantém a imagem "DORMINDO" na tela e
 tenta de novo a cada 30 s, em vez de abrir uma página de erro.
 
 ## Manutenção
+
+- **Mudou o `nginx.conf.template`?** O nginx só lê o template na partida do
+  container: o deploy reinicia o `kindle-ui` (um `reload` não basta).
 
 - **SSH:** `ssh root@192.168.18.183` (só com o Kindle acordado; com o ciclo de
   15 min, as janelas são de ~45 s — passar pelo servidor costuma ser mais
