@@ -254,6 +254,18 @@ if (DORMINDO) {
   txt('msg', 'Aperte o botão de ligar para acordar');
 }
 
+// Redesenho completo pouco depois de abrir: as barras da Amazon somem depois
+// que a página já foi pintada e deixam uma faixa branca no topo (o Chromium do
+// Kindle não repinta a área exposta). Uma camada por cima e fora força tudo.
+function repintar() {
+  var c = document.createElement('div');
+  c.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;background:#fff;z-index:99';
+  document.body.appendChild(c);
+  setTimeout(function () { document.body.removeChild(c); }, 120);
+}
+setTimeout(repintar, 4000);
+setTimeout(repintar, 10000);
+
 atualizar();
 if (!DORMINDO) {
   setInterval(atualizar, 60000);
