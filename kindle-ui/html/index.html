@@ -119,8 +119,9 @@ var DORMIR_EM = 170000;
 // Recarregada ao acordar (botão ou despertador de 15 min): sem toque volta a
 // "DORMINDO" em 25 s (o sono.sh suspende aos 35 s). Um toque volta aos 170 s.
 var DORMIR_EM_ACORDADO = 25000;
-var curto = false;
-try { curto = sessionStorage.getItem('acordou') === '1'; sessionStorage.removeItem('acordou'); } catch (e) {}
+// (o aviso vem na URL: o navegador do Kindle não guarda sessionStorage)
+var curto = location.search.indexOf('acordou=1') >= 0;
+if (curto && history.replaceState) history.replaceState(null, '', location.pathname);
 var DORMINDO = false;
 
 var CLIMA = { 'sunny': 'Sol', 'clear-night': 'Céu limpo', 'partlycloudy': 'Parc. nublado',
@@ -269,6 +270,12 @@ document.addEventListener('click', function () {
 setInterval(function () {
   if (!DORMINDO && Date.now() - ultimoToque > (curto ? DORMIR_EM_ACORDADO : DORMIR_EM)) dormir(true);
 }, 5000);
+// "Dormir agora" pedido de fora (HA/servidor): o sono.sh suspende em até 5 s,
+// então a página também olha o sinal, pra imagem congelada dizer DORMINDO.
+setInterval(function () {
+  if (DORMINDO) return;
+  pegar('input_boolean.kindle_dormir').then(function (e) { if (e && e.state === 'on') dormir(true); });
+}, 4000);
 // Sair: o Kindle fecha o painel e volta à tela normal (sono.sh consulta
 // input_boolean.kindle_sair). Pra voltar: KUAL → Painel Casa → Iniciar painel.
 $('sair').addEventListener('click', function () {
@@ -302,8 +309,7 @@ function recarregarQuandoVoltar() {
   fetch('/api/states/weather.casa', { cache: 'no-store' })
     .then(function (r) {
       if (!r.ok) throw 0;
-      try { sessionStorage.setItem('acordou', '1'); } catch (e) {}
-      location.reload();
+      location.replace(location.pathname + '?acordou=1');
     })
     .catch(function () { setTimeout(recarregarQuandoVoltar, 3000); });
 }

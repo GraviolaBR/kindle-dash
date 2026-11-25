@@ -103,9 +103,11 @@ while true; do
     # A página já se trocou sozinha pra versão "dormindo" (cadeado ou tempo sem
     # toque); espera o e-ink terminar de desenhar e suspende.
     sleep 4
-    HORA=$(TZ="<-03>3" date +%H); HORA=${HORA#0}
-    if [ "$HORA" -ge "$NOITE_INICIO" ] && [ "$HORA" -lt "$NOITE_FIM" ]; then
-        ESPERA=$DESPERTADOR_NOITE
+    # Madrugada: não atualiza; acorda só às NOITE_FIM (botão continua acordando).
+    set -- $(TZ="<-03>3" date '+%H %M %S')
+    H=${1#0}; M=${2#0}; S=${3#0}
+    if [ "$H" -ge "$NOITE_INICIO" ] && [ "$H" -lt "$NOITE_FIM" ]; then
+        ESPERA=$(( (NOITE_FIM - H) * 3600 - M * 60 - S ))
     else
         ESPERA=$DESPERTADOR
     fi
