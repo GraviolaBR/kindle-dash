@@ -30,11 +30,19 @@ server {
 
     # Botões: só os scripts da lista (todos já existem no HA; os kindle_* estão
     # em packages/kindle.yaml do repositório homeassistant).
-    location ~ ^/api/services/script/(byd_ligar_ar|byd_desligar_ar|byd_travar|byd_atualizar|falar_carga_carro|falar_vendas_hoje|cnn_tv_sala|cnn_tv_quarto|pausar_sala|continuar_sala|kindle_[a-z0-9_]+)$ {
+    # Vira script.turn_on, que dispara e responde na hora: chamar o script
+    # direto faz o HA esperar ele terminar (a CNN leva 30–40 s ligando a TV) e
+    # o proxy dava 504. O corpo que vem do Kindle é ignorado (o nginx monta um
+    # fixo com o nome da lista), pra ninguém usar o corpo pra chamar outro
+    # script; por isso os scripts daqui não recebem parâmetros (o ar usa o
+    # padrão de 22 °C).
+    location ~ ^/api/services/script/(?<script>byd_ligar_ar|byd_desligar_ar|byd_travar|byd_atualizar|falar_carga_carro|falar_vendas_hoje|cnn_tv_sala|cnn_tv_quarto|pausar_sala|continuar_sala|kindle_[a-z0-9_]+)$ {
         limit_except POST { deny all; }
+        rewrite ^ /api/services/script/turn_on break;
         proxy_pass ${HA_URL};
         proxy_set_header Authorization "Bearer ${KINDLE_HA_TOKEN}";
         proxy_set_header Content-Type "application/json";
+        proxy_set_body '{"entity_id":"script.$script"}';
         proxy_read_timeout 15s;
     }
 

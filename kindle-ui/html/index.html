@@ -57,7 +57,7 @@
     </div>
     <div class="pequeno" id="carro-status">&nbsp;</div>
     <div class="botoes">
-      <button data-script="byd_ligar_ar" data-dados='{"temperatura":22}' data-confirma="Ligar o ar do carro em 22 °C?">Ligar ar</button>
+      <button data-script="byd_ligar_ar" data-confirma="Ligar o ar do carro em 22 °C?">Ligar ar</button>
       <button data-script="byd_desligar_ar">Desligar ar</button>
       <button data-script="byd_travar" data-confirma="Travar o carro?">Travar</button>
       <button data-script="byd_atualizar">Atualizar</button>
@@ -229,9 +229,10 @@ function chamar(btn) {
   txt('msg', btn.textContent + '…');
   fetch('/api/services/script/' + btn.getAttribute('data-script'), {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: btn.getAttribute('data-dados') || '{}'
+    body: '{}'
   }).then(function (r) {
-    txt('msg', r.ok ? btn.textContent + ': feito' : btn.textContent + ': erro ' + r.status);
+    // (o HA só confirma que disparou; a ação em si pode levar alguns segundos)
+    txt('msg', r.ok ? btn.textContent + ': enviado' : btn.textContent + ': erro ' + r.status);
   }).catch(function () {
     txt('msg', btn.textContent + ': sem conexão');
   }).then(function () {
