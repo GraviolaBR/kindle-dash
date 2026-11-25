@@ -119,6 +119,12 @@ while true; do
     echo mem > /sys/power/state 2>/dev/null
     log "acordou"
     curto=1
+    # SSH (USBNetLite/dropbear): conexões abertas na hora da suspensão ficam
+    # penduradas — o relógio do prazo para enquanto o Kindle dorme — e, somadas,
+    # fazem o dropbear recusar as novas ("connection closed" antes da troca de
+    # chaves; aconteceu em 25/11). Ao acordar, mata tudo menos o processo principal.
+    MESTRE=$(cat /mnt/us/usbnetlite/run/sshd.pid 2>/dev/null)
+    for P in $(pidof dropbear); do [ "$P" != "$MESTRE" ] && kill "$P" 2>/dev/null; done
 done
 
 rm -f $PIDF

@@ -102,8 +102,22 @@ Depois: KUAL → Painel Casa → Iniciar painel (ou reiniciar o Kindle).
 | Quer dormir já | — | tocar no cadeado AO VIVO |
 | Sair do painel | — | botão **Sair** no rodapé (confirma) → volta ao Kindle normal. Voltar: KUAL → Painel Casa → Iniciar painel |
 
-Suspende depois de 3 min sem toque e acorda sozinho a cada 12 h. A bateria
-aparece no rodapé e no HA (`sensor.kindle_bateria`).
+- **Dorme** com 3 min sem toque (a página vira "DORMINDO" aos 2 min 50 s) ou no
+  toque do cadeado.
+- **Atualiza sozinho a cada 15 min**: o despertador (`rtc0`) acorda o Kindle, o
+  Wi-Fi volta, a página recarrega com dados novos, vira "DORMINDO" em 25 s e
+  ele suspende de novo aos 35 s sem toque (~45 s acordado por vez).
+- **Madrugada (0h–7h) não atualiza**: dormindo nesse horário, o despertador vai
+  direto pras 7h. O botão de ligar acorda a qualquer hora.
+- **Botão de ligar**: acorda; sem toque volta a dormir em 35 s, com um toque
+  vale a regra dos 3 min.
+- Tempos em `kindle/kdash/config.sh` (`OCIOSO`, `OCIOSO_ACORDAR`,
+  `DESPERTADOR`, `NOITE_INICIO`/`NOITE_FIM`).
+
+Bateria: ~78 despertares por dia × ~45 s ≈ 1 h acordado, mais o uso. Ainda sem
+medição (estimativa de 1–2 semanas por carga); o Kindle manda a bateria a cada
+despertar, então o histórico de `sensor.kindle_bateria` no HA mostra o consumo
+real. Na tomada: KUAL → Painel Casa → Não dormir.
 
 ## Wi-Fi
 
@@ -117,7 +131,14 @@ tenta de novo a cada 30 s, em vez de abrir uma página de erro.
 
 ## Manutenção
 
-- **SSH:** `ssh root@192.168.18.183` (só com o Kindle acordado).
+- **SSH:** `ssh root@192.168.18.183` (só com o Kindle acordado; com o ciclo de
+  15 min, as janelas são de ~45 s — passar pelo servidor costuma ser mais
+  confiável: `ssh -J servidor root@192.168.18.183`). Pra mexer com calma:
+  `touch /mnt/us/NAO_DORMIR` logo ao entrar, e apagar no fim.
+- **SSH recusando ("connection closed" antes de autenticar):** conexões
+  abertas na hora de suspender ficam penduradas (o prazo do dropbear não corre
+  com o Kindle dormindo) e lotam o limite. O `sono.sh` mata essas sobras a cada
+  despertar; se mesmo assim travar, reiniciar o Kindle resolve.
 - **Log:** `/tmp/kdash.log` (ciclo) e `/tmp/kdash-navegador.log` (Chromium). Somem ao reiniciar.
 - **Ver a tela do Kindle do Mac:** `ssh root@<ip> 'dd if=/dev/fb0 bs=1088 count=1448' > tela.raw`
   e converter (8 bits cinza, 1088×1448, cortar pra 1072 de largura).
