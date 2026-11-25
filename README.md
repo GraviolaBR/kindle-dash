@@ -19,7 +19,7 @@ Kindle (Wi-Fi WINDSOR, 192.168.18.183)          Servidor (bagshotserver, 192.168
    └ kindle-ui/html/index.html                  ├ serve a página
   /mnt/us/kdash/sono.sh (upstart kdash.conf)    └ /api/* liberadas ──▶ Home Assistant :8123
    ├ abre o painel, espera 3 min sem toque          (token posto pelo nginx)
-   ├ consulta input_boolean.kindle_dormir
+   ├ consulta input_boolean.kindle_dormir / kindle_sair
    ├ envia sensor.kindle_bateria (~1 min)
    └ mostra /dormir, arma o despertador, suspende
 ```
@@ -35,8 +35,9 @@ Kindle (Wi-Fi WINDSOR, 192.168.18.183)          Servidor (bagshotserver, 192.168
   Kindle. Todo o resto de `/api/` dá 403. Botão ou sensor novo na página →
   incluir no template também.
 - **No HA** (repo `homeassistant`, `config/packages/kindle.yaml`):
-  `input_boolean.kindle_dormir` + automação que o desliga 15 s depois, script
-  `kindle_dormir` (cadeado) e scripts de desligar as TVs. O
+  `input_boolean.kindle_dormir` / `kindle_sair` + automação que os desliga 15 s
+  depois, scripts `kindle_dormir` (cadeado) e `kindle_sair` (botão Sair do
+  rodapé) e scripts de desligar as TVs. O
   `sensor.kindle_bateria` é criado pelo próprio Kindle (POST na API).
 - **No Kindle**:
   - O navegador do 5.17 é um **Chromium 75** (`/usr/bin/chromium`, dentro do
@@ -95,10 +96,20 @@ Depois: KUAL → Painel Casa → Iniciar painel (ou reiniciar o Kindle).
 | Cadeado **AO VIVO** | painel acordado | tocar em qualquer botão; cada toque também atualiza |
 | Cadeado **DORMINDO** | imagem congelada, Kindle suspenso | apertar o **botão de ligar** e esperar uns segundos |
 | Quer dormir já | — | tocar no cadeado AO VIVO |
-| Sair do painel | — | botão de ligar → KUAL → Painel Casa → Parar painel |
+| Sair do painel | — | botão **Sair** no rodapé (confirma) → volta ao Kindle normal. Voltar: KUAL → Painel Casa → Iniciar painel |
 
 Suspende depois de 3 min sem toque e acorda sozinho a cada 12 h. A bateria
 aparece no rodapé e no HA (`sensor.kindle_bateria`).
+
+## Wi-Fi
+
+O Kindle só deve ter a rede **WINDSOR** salva. Com a "bagshot" (Google Nest,
+192.168.86.x) também salva, ao acordar ele entrava nela e não alcançava o
+servidor — ela foi esquecida em 25/11. Ainda assim o `sono.sh` desliga o Wi-Fi
+pelo `wifid` antes de suspender e religa ao acordar (`wifid enable`,
+`cmd ensureConnection`): suspendendo direto pelo kernel, o 5.17 não religa
+sozinho. Sem o servidor respondendo, ele mantém a imagem "DORMINDO" na tela e
+tenta de novo a cada 30 s, em vez de abrir uma página de erro.
 
 ## Manutenção
 

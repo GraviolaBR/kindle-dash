@@ -12,7 +12,7 @@ server {
     server_tokens off;
 
     # Leitura dos estados mostrados na página.
-    location ~ ^/api/states/(sensor\.(byd|usina|vendas)_[a-z0-9_]+|binary_sensor\.byd_[a-z0-9_]+|media_player\.(tv_sala|tv_quarto)|weather\.casa|input_boolean\.kindle_dormir)$ {
+    location ~ ^/api/states/(sensor\.(byd|usina|vendas)_[a-z0-9_]+|binary_sensor\.byd_[a-z0-9_]+|media_player\.(tv_sala|tv_quarto)|weather\.casa|input_boolean\.kindle_(dormir|sair))$ {
         limit_except GET { deny all; }
         proxy_pass ${HA_URL};
         proxy_set_header Authorization "Bearer ${KINDLE_HA_TOKEN}";

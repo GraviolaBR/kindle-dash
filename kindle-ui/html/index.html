@@ -38,6 +38,8 @@
   .rodape { position: absolute; left: 10px; right: 10px; bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; }
   body.dormindo .botoes, body.dormindo .so-acordado { display: none; }
   .aviso { font-size: 15px; font-weight: bold; }
+  .sair { border: 1px solid #000; border-radius: 6px; padding: 2px 10px; margin-right: 6px; }
+  body.dormindo .sair { display: none; }
 </style>
 </head>
 <body>
@@ -103,7 +105,7 @@
   </div>
 
   <div class="rodape">
-    <span id="msg">&nbsp;</span>
+    <span><span class="sair" id="sair">Sair</span> <span id="msg">&nbsp;</span></span>
     <span>Kindle <span id="kbat">--</span>% · <span id="atualizado">--</span></span>
   </div>
 
@@ -239,6 +241,13 @@ $('cadeado').addEventListener('click', function () {
   if (DORMINDO) return;
   txt('cadeado', 'DORMINDO…');
   fetch('/api/services/script/kindle_dormir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+});
+// Sair: o Kindle fecha o painel e volta à tela normal (sono.sh consulta
+// input_boolean.kindle_sair). Pra voltar: KUAL → Painel Casa → Iniciar painel.
+$('sair').addEventListener('click', function () {
+  if (!window.confirm('Sair do painel e voltar ao Kindle normal?')) return;
+  txt('msg', 'Saindo…');
+  fetch('/api/services/script/kindle_sair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
 });
 if (DORMINDO) {
   txt('cadeado', 'DORMINDO');
