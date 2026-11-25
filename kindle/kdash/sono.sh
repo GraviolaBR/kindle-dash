@@ -62,9 +62,17 @@ while true; do
 
     # sem rede, mantém a imagem atual (não abre página de erro) e tenta de novo
     if ! esperar_rede; then sleep 30; continue; fi
-    /mnt/us/kdash/painel.sh /
+    # Na primeira volta (ou se o navegador morreu) abre o painel. Depois de
+    # acordar o navegador segue aberto e a própria página se recarrega:
+    # reabrir aqui fazia a tela inicial do Kindle piscar.
+    # (PID do navegador do painel, não do navegador da Amazon, que tem o mesmo nome)
+    if ! kill -0 "$(cat /tmp/kdash-navegador.pid 2>/dev/null)" 2>/dev/null; then
+        /mnt/us/kdash/painel.sh /
+        log "painel aberto"
+    else
+        log "painel já aberto (a página recarrega sozinha)"
+    fi
     enviar_bateria
-    log "painel aberto"
 
     ocioso=0; n=0
     while [ $ocioso -lt $OCIOSO ] || [ -f /mnt/us/NAO_DORMIR ]; do

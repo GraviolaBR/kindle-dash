@@ -286,6 +286,22 @@ setTimeout(repintar, 10000);
 
 atualizar();
 setInterval(function () { if (!DORMINDO) atualizar(); }, 60000);
+
+// Ao acordar da suspensão o navegador continua aberto e os timers seguem de
+// onde pararam: um relógio de 3 s percebe o salto, espera o servidor responder
+// (o Wi-Fi leva alguns segundos pra voltar) e recarrega a página no lugar —
+// sem fechar o navegador, que fazia a tela inicial do Kindle piscar.
+var relogioAnterior = Date.now(), recarregando = false;
+function recarregarQuandoVoltar() {
+  fetch('/api/states/weather.casa', { cache: 'no-store' })
+    .then(function (r) { if (r.ok) location.reload(); else throw 0; })
+    .catch(function () { setTimeout(recarregarQuandoVoltar, 3000); });
+}
+setInterval(function () {
+  var agora = Date.now();
+  if (agora - relogioAnterior > 20000 && !recarregando) { recarregando = true; recarregarQuandoVoltar(); }
+  relogioAnterior = agora;
+}, 3000);
 </script>
 </body>
 </html>

@@ -21,7 +21,8 @@ Kindle (Wi-Fi WINDSOR, 192.168.18.183)          Servidor (bagshotserver, 192.168
    ├ abre o painel, espera 3 min sem toque          (token posto pelo nginx)
    ├ consulta input_boolean.kindle_dormir / kindle_sair
    ├ envia sensor.kindle_bateria (~1 min)
-   └ arma o despertador e suspende (a página já trocou pra "DORMINDO")
+   ├ arma o despertador e suspende (a página já trocou pra "DORMINDO")
+   └ ao acordar: religa o Wi-Fi; a página percebe o salto do relógio e se recarrega
 ```
 
 - **Página** (`kindle-ui/html/index.html`): um HTML só, preto e branco, alvos

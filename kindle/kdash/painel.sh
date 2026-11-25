@@ -31,3 +31,4 @@ chroot /chroot /mnt/us/kdash/chromium/bin/kindle_browser \
   --force-gpu-mem-available-mb=40 --enable-low-end-device-mode --enable-low-res-tiling \
   --disable-site-isolation-trials --enable-grayscale-mode \
   "$URL" > /tmp/kdash-navegador.log 2>&1 &
+echo $! > /tmp/kdash-navegador.pid
