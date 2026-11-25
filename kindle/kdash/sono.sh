@@ -56,6 +56,7 @@ echo $$ > $PIDF
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
 log "início"
+curto=0
 while true; do
     [ -f /mnt/us/DESLIGAR_PAINEL ] && { log "DESLIGAR_PAINEL: saindo"; break; }
     lipc-set-prop com.lab126.powerd preventScreenSaver 1
@@ -75,12 +76,16 @@ while true; do
     fi
     enviar_bateria
 
+    # Depois de acordar, sem toque volta a dormir em OCIOSO_ACORDAR (o
+    # despertador de 15 min só atualiza a tela); com um toque vale o OCIOSO.
+    # A página faz o mesmo do lado dela (25 s / 170 s) pra trocar pra "DORMINDO".
     ocioso=0; n=0
-    while [ $ocioso -lt $OCIOSO ] || [ -f /mnt/us/NAO_DORMIR ]; do
+    if [ "$curto" = 1 ]; then limite=$OCIOSO_ACORDAR; else limite=$OCIOSO; fi
+    while [ $ocioso -lt $limite ] || [ -f /mnt/us/NAO_DORMIR ]; do
         [ -f /mnt/us/DESLIGAR_PAINEL ] && break
         # um toque qualquer zera o contador
         if timeout $CONSULTA dd if="$TOQUE" bs=16 count=1 >/dev/null 2>&1; then
-            ocioso=0
+            ocioso=0; limite=$OCIOSO
         else
             ocioso=$((ocioso + CONSULTA))
         fi
@@ -95,17 +100,23 @@ while true; do
     done
     [ -f /mnt/us/DESLIGAR_PAINEL ] && continue
 
-    # A página já se trocou sozinha pra versão "dormindo" (cadeado ou 170 s sem
-    # toque); espera o e-ink terminar de desenhar e suspende. Ao acordar o
-    # painel é reaberto do zero (dados novos).
+    # A página já se trocou sozinha pra versão "dormindo" (cadeado ou tempo sem
+    # toque); espera o e-ink terminar de desenhar e suspende.
     sleep 4
+    HORA=$(TZ="<-03>3" date +%H); HORA=${HORA#0}
+    if [ "$HORA" -ge "$NOITE_INICIO" ] && [ "$HORA" -lt "$NOITE_FIM" ]; then
+        ESPERA=$DESPERTADOR_NOITE
+    else
+        ESPERA=$DESPERTADOR
+    fi
     echo 0 > $RTC/wakealarm 2>/dev/null
-    echo +$DESPERTADOR > $RTC/wakealarm 2>/dev/null
-    log "suspendendo"
+    echo +$ESPERA > $RTC/wakealarm 2>/dev/null
+    log "suspendendo (acorda em $((ESPERA / 60)) min)"
     lipc-set-prop com.lab126.wifid enable 0 2>/dev/null
     sleep 1
     echo mem > /sys/power/state 2>/dev/null
     log "acordou"
+    curto=1
 done
 
 rm -f $PIDF

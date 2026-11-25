@@ -116,6 +116,11 @@
 // ou depois de DORMIR_EM ms sem toque — 10 s antes do OCIOSO do sono.sh (180 s).
 // /dormir abre direto nesse modo (só pra testar).
 var DORMIR_EM = 170000;
+// Recarregada ao acordar (botão ou despertador de 15 min): sem toque volta a
+// "DORMINDO" em 25 s (o sono.sh suspende aos 35 s). Um toque volta aos 170 s.
+var DORMIR_EM_ACORDADO = 25000;
+var curto = false;
+try { curto = sessionStorage.getItem('acordou') === '1'; sessionStorage.removeItem('acordou'); } catch (e) {}
 var DORMINDO = false;
 
 var CLIMA = { 'sunny': 'Sol', 'clear-night': 'Céu limpo', 'partlycloudy': 'Parc. nublado',
@@ -258,10 +263,11 @@ $('cadeado').addEventListener('click', function (ev) {
 var ultimoToque = Date.now();
 document.addEventListener('click', function () {
   ultimoToque = Date.now();
+  curto = false;
   if (DORMINDO) { dormir(false); atualizar(); }
 }, true);
 setInterval(function () {
-  if (!DORMINDO && Date.now() - ultimoToque > DORMIR_EM) dormir(true);
+  if (!DORMINDO && Date.now() - ultimoToque > (curto ? DORMIR_EM_ACORDADO : DORMIR_EM)) dormir(true);
 }, 5000);
 // Sair: o Kindle fecha o painel e volta à tela normal (sono.sh consulta
 // input_boolean.kindle_sair). Pra voltar: KUAL → Painel Casa → Iniciar painel.
@@ -294,7 +300,11 @@ setInterval(function () { if (!DORMINDO) atualizar(); }, 60000);
 var relogioAnterior = Date.now(), recarregando = false;
 function recarregarQuandoVoltar() {
   fetch('/api/states/weather.casa', { cache: 'no-store' })
-    .then(function (r) { if (r.ok) location.reload(); else throw 0; })
+    .then(function (r) {
+      if (!r.ok) throw 0;
+      try { sessionStorage.setItem('acordou', '1'); } catch (e) {}
+      location.reload();
+    })
     .catch(function () { setTimeout(recarregarQuandoVoltar, 3000); });
 }
 setInterval(function () {
