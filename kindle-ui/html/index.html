@@ -193,17 +193,19 @@ function relogio() {
   txt('data', DIAS[d.getDay()] + ' ' + dois(d.getDate()) + '/' + dois(d.getMonth() + 1));
 }
 
-// Média do ciclo da usina: dias fechados desde o dia 18 (mesma conta do painel do HA).
-function mediaCiclo(dias) {
-  if (!dias || !dias.length) return null;
-  var hoje = new Date(), ini = new Date(hoje.getFullYear(), hoje.getMonth(), 18);
+// Média do ciclo da usina: dias fechados desde o dia 18; hoje entra a partir das
+// 17:50 com a cota ao vivo (a usina já parou de gerar). Mesma conta do painel do HA.
+function mediaCiclo(dias, cotaHoje, agora) {
+  var hoje = agora || new Date(), ini = new Date(hoje.getFullYear(), hoje.getMonth(), 18);
   if (hoje.getDate() < 18) ini = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 18);
   var hojeIso = hoje.getFullYear() + '-' + dois(hoje.getMonth() + 1) + '-' + dois(hoje.getDate());
   var iniIso = ini.getFullYear() + '-' + dois(ini.getMonth() + 1) + '-' + dois(ini.getDate());
   var soma = 0, n = 0;
-  dias.forEach(function (d) {
+  (dias || []).forEach(function (d) {
     if (d.data >= iniIso && d.data < hojeIso && num(d.kwh) !== null) { soma += num(d.kwh); n++; }
   });
+  var depoisDas1750 = hoje.getHours() * 60 + hoje.getMinutes() >= 17 * 60 + 50;
+  if (depoisDas1750 && num(cotaHoje) !== null) { soma += num(cotaHoje); n++; }
   return n ? soma / n : null;
 }
 
@@ -246,7 +248,7 @@ function atualizar() {
     var cota = num(st('sensor.usina_cota_6'));
     txt('usina-cota', cota === null ? '' : 'Hoje ' + br(cota, 1) + ' kWh');
     var cr = s['sensor.usina_cotas_recentes'];
-    var media = cr && cr.attributes ? mediaCiclo(cr.attributes.dias) : null;
+    var media = cr && cr.attributes ? mediaCiclo(cr.attributes.dias, st('sensor.usina_cota_6')) : null;
     txt('usina-media', media === null ? '' : 'Média do ciclo ' + br(media, 1) + ' kWh');
 
     var v = num(st('sensor.vendas_hoje'));

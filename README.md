@@ -37,6 +37,9 @@ Kindle (Wi-Fi WINDSOR, 192.168.18.183)          Servidor (bagshotserver, 192.168
   estrelas à noite (18h–6h); gráfico da potência de hoje (05h–19h, linha
   pontilhada às 12h), do `/api/history` do HA — o proxy só libera o histórico
   de `sensor.usina_potencia`, nesse formato exato.
+  Embaixo, cota de hoje e "Média do ciclo" (desde o dia 18, dias fechados de
+  `sensor.usina_cotas_recentes`; hoje entra a partir das 17:50 com a cota ao
+  vivo, porque a usina já parou de gerar — mesma regra do dashboard do HA).
 - **Proxy** (`kindle-ui/nginx.conf.template`): o token de longa duração do HA
   fica só no `.env` do servidor. O nginx **não** repassa a API inteira: só ler
   as entidades da página, chamar os scripts da lista e gravar a bateria do
