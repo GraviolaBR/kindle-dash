@@ -79,7 +79,7 @@ while true; do
     # Depois de acordar, sem toque volta a dormir em OCIOSO_ACORDAR (o
     # despertador de 15 min só atualiza a tela); com um toque vale o OCIOSO.
     # A página faz o mesmo do lado dela (25 s / 170 s) pra trocar pra "DORMINDO".
-    ocioso=0; n=0
+    ocioso=0; n=0; semrede=0
     if [ "$curto" = 1 ]; then limite=$OCIOSO_ACORDAR; else limite=$OCIOSO; fi
     while [ $ocioso -lt $limite ] || [ -f /mnt/us/NAO_DORMIR ]; do
         [ -f /mnt/us/DESLIGAR_PAINEL ] && break
@@ -89,9 +89,21 @@ while true; do
         else
             ocioso=$((ocioso + CONSULTA))
         fi
-        case "$(wget -q -O - "http://$SERVIDOR:$PORTA/api/states/input_boolean.kindle_dormir" 2>/dev/null)" in
+        R=$(wget -q -T 4 -O - "http://$SERVIDOR:$PORTA/api/states/input_boolean.kindle_dormir" 2>/dev/null)
+        case "$R" in
             *'"state":"on"'*|*'"state": "on"'*) log "dormir agora (cadeado)"; [ -f /mnt/us/NAO_DORMIR ] || break ;;
         esac
+        # Wi-Fi caiu com o Kindle acordado (a tela fica com traços): depois de
+        # ~30 s sem servidor, religa pelo wifid — sem isto ninguém religava.
+        if [ -z "$R" ]; then
+            semrede=$((semrede + 1))
+            if [ $semrede -ge 6 ]; then
+                log "sem servidor há ~30 s: religando Wi-Fi"
+                esperar_rede; semrede=0
+            fi
+        else
+            semrede=0
+        fi
         case "$(wget -q -O - "http://$SERVIDOR:$PORTA/api/states/input_boolean.kindle_sair" 2>/dev/null)" in
             *'"state":"on"'*) log "sair (botão da página)"; touch /mnt/us/DESLIGAR_PAINEL; break ;;
         esac

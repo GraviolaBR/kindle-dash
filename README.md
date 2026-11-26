@@ -133,6 +133,11 @@ pelo `wifid` antes de suspender e religa ao acordar (`wifid enable`,
 sozinho. Sem o servidor respondendo, ele mantém a imagem "DORMINDO" na tela e
 tenta de novo a cada 30 s, em vez de abrir uma página de erro.
 
+O Wi-Fi também cai com o Kindle acordado: ao voltar de uma suspensão ele pode
+ficar em `PENDING` e não conectar sozinho (visto em 26/11: tela com traços,
+parecendo travado). Por isso, no laço de espera, depois de ~30 s sem resposta
+do servidor o `sono.sh` chama `esperar_rede` de novo (log: "religando Wi-Fi").
+
 ## Manutenção
 
 - **Mudou o `nginx.conf.template`?** O nginx só lê o template na partida do
