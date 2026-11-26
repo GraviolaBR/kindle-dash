@@ -138,6 +138,15 @@ ficar em `PENDING` e não conectar sozinho (visto em 26/11: tela com traços,
 parecendo travado). Por isso, no laço de espera, depois de ~30 s sem resposta
 do servidor o `sono.sh` chama `esperar_rede` de novo (log: "religando Wi-Fi").
 
+## Luz frontal
+
+Suspendendo direto pelo kernel (`echo mem`), a luz frontal ficava acesa a
+noite toda: 35% → 24% entre 0h e 7h de 25 pra 26/11, ~1,6%/h, mais do que o
+ciclo acordado. Antes de suspender, o `sono.sh` guarda o valor de
+`/sys/class/backlight/bl/brightness` (0–2047) em `/mnt/us/kdash/luz.salva`,
+zera e, ao acordar, devolve o mesmo valor. Dormindo no escuro a tela não se lê
+sem luz; um toque no botão acende de novo.
+
 ## Biblioteca na frente do painel
 
 A biblioteca do Kindle (`KPPMainApp`) fica aberta atrás do navegador e às vezes

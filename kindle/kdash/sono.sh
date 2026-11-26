@@ -151,9 +151,15 @@ while true; do
     echo +$ESPERA > $RTC/wakealarm 2>/dev/null
     log "suspendendo (acorda em $((ESPERA / 60)) min)"
     lipc-set-prop com.lab126.wifid enable 0 2>/dev/null
+    # Luz frontal: suspendendo direto pelo kernel ela ficava acesa a noite toda
+    # (~1,6%/h de bateria em 26/11). Apaga e, ao acordar, volta ao mesmo valor.
+    LUZ=$(cat $LUZ_ARQ 2>/dev/null)
+    [ -n "$LUZ" ] && [ "$LUZ" -gt 0 ] && echo "$LUZ" > /mnt/us/kdash/luz.salva
+    echo 0 > $LUZ_ARQ 2>/dev/null
     sleep 1
     echo mem > /sys/power/state 2>/dev/null
     log "acordou"
+    cat /mnt/us/kdash/luz.salva > $LUZ_ARQ 2>/dev/null
     curto=1
     # SSH (USBNetLite/dropbear): conexões abertas na hora da suspensão ficam
     # penduradas — o relógio do prazo para enquanto o Kindle dorme — e, somadas,
