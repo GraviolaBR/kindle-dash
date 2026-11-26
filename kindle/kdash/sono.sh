@@ -47,6 +47,26 @@ esperar_rede() {
     return 1
 }
 
+# O painel está mesmo na tela? A biblioteca do Kindle (KPPMainApp) fica aberta
+# atrás do navegador e às vezes vem pra frente (visto em 26/11: navegador vivo,
+# tela na biblioteca). O e-ink só mostra o que foi desenhado por último, então
+# olha o próprio framebuffer: a linha FB_LINHA do painel é a borda do quadro do
+# carro, quase toda preta (~1000 px; numa tela qualquer dá poucas dezenas).
+# Vale pra versão "DORMINDO" também (ela só esconde os botões).
+FB_LINHA=93
+painel_na_tela() {
+    P=$(dd if=/dev/fb0 bs=1088 skip=$FB_LINHA count=1 2>/dev/null | od -An -v -tu1 |
+        awk '{for(i=1;i<=NF;i++) if($i<100) n++} END{print n+0}')
+    [ "${P:-0}" -gt 900 ]
+}
+reabrir_se_sumiu() {
+    painel_na_tela && return 0
+    sleep 3; painel_na_tela && return 0   # pode estar no meio de um redesenho
+    log "painel fora da tela (biblioteca na frente?): reabrindo"
+    /mnt/us/kdash/painel.sh "$1"
+    sleep 12
+}
+
 # um ciclo só (iniciar.sh e o upstart checam este PID)
 PIDF=/tmp/kdash.pid
 if [ -f $PIDF ] && kill -0 "$(cat $PIDF)" 2>/dev/null; then exit 0; fi
@@ -109,12 +129,16 @@ while true; do
         esac
         n=$((n + 1))
         [ $n -ge $BATERIA_A_CADA ] && { enviar_bateria; n=0; }
+        # a cada ~30 s (dando tempo da página carregar depois de acordar)
+        [ $((n % 6)) -eq 3 ] && reabrir_se_sumiu /
     done
     [ -f /mnt/us/DESLIGAR_PAINEL ] && continue
 
     # A página já se trocou sozinha pra versão "dormindo" (cadeado ou tempo sem
-    # toque); espera o e-ink terminar de desenhar e suspende.
+    # toque); espera o e-ink terminar de desenhar e suspende — mas não com a
+    # biblioteca congelada na tela.
     sleep 4
+    reabrir_se_sumiu /
     # Madrugada: não atualiza; acorda só às NOITE_FIM (botão continua acordando).
     set -- $(TZ="<-03>3" date '+%H %M %S')
     H=${1#0}; M=${2#0}; S=${3#0}

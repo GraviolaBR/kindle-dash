@@ -138,6 +138,16 @@ ficar em `PENDING` e não conectar sozinho (visto em 26/11: tela com traços,
 parecendo travado). Por isso, no laço de espera, depois de ~30 s sem resposta
 do servidor o `sono.sh` chama `esperar_rede` de novo (log: "religando Wi-Fi").
 
+## Biblioteca na frente do painel
+
+A biblioteca do Kindle (`KPPMainApp`) fica aberta atrás do navegador e às vezes
+vem pra frente sozinha — o navegador continua vivo, mas a tela mostra a
+biblioteca (26/11). O `activeApp` do appmgrd não serve pra detectar (é sempre
+`KPPMainApp`), então o `sono.sh` olha o framebuffer: a linha 93 do painel é a
+borda do quadro do carro, quase toda preta. A cada ~30 s acordado e antes de
+suspender, se ela sumir (conferido duas vezes), reabre o painel (log: "painel
+fora da tela"). Mudou o topo da página? Ajustar `FB_LINHA` no `sono.sh`.
+
 ## Manutenção
 
 - **Mudou o `nginx.conf.template`?** O nginx só lê o template na partida do
