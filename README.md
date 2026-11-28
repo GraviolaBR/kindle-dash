@@ -107,7 +107,7 @@ Depois: KUAL → Painel Casa → Iniciar painel (ou reiniciar o Kindle).
 | Cadeado **AO VIVO** | painel acordado | tocar em qualquer botão; cada toque também atualiza |
 | Cadeado **DORMINDO** | imagem congelada, Kindle suspenso | apertar o **botão de ligar** e esperar uns segundos |
 | Quer dormir já | — | tocar no cadeado AO VIVO |
-| Sair do painel | — | botão **Sair** no rodapé (confirma) → volta ao Kindle normal. Voltar: KUAL → Painel Casa → Iniciar painel |
+| Sair do painel | — | botão **Sair** no rodapé, **dois toques** (o 1º pergunta, o 2º confirma em até 6 s) → volta ao Kindle normal. Voltar: KUAL → Painel Casa → Iniciar painel |
 
 - **Dorme** com 3 min sem toque (a página vira "DORMINDO" aos 2 min 50 s) ou no
   toque do cadeado.
@@ -118,6 +118,11 @@ Depois: KUAL → Painel Casa → Iniciar painel (ou reiniciar o Kindle).
   direto pras 7h. O botão de ligar acorda a qualquer hora.
 - **Botão de ligar**: acorda; sem toque volta a dormir em 35 s, com um toque
   vale a regra dos 3 min.
+- **Confirmação = tocar duas vezes** (Sair, Ligar ar, Travar): o 1º toque
+  escurece o botão e mostra a pergunta no rodapé; o 2º, em até 6 s, executa.
+  Não usar `window.confirm`/`alert`: no navegador em tela cheia do Kindle a
+  janela não aparece e a página fica travada esperando (até 28/11 esses três
+  botões nunca chegaram ao servidor).
 - Tempos em `kindle/kdash/config.sh` (`OCIOSO`, `OCIOSO_ACORDAR`,
   `DESPERTADOR`, `NOITE_INICIO`/`NOITE_FIM`).
 

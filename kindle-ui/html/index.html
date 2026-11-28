@@ -270,11 +270,34 @@ function atualizar() {
   });
 }
 
+// Confirmação na própria página: no navegador em tela cheia do Kindle (PC:NN) o
+// window.confirm não aparece e trava a página esperando a resposta (28/11: Sair,
+// Ligar ar e Travar nunca chegaram ao servidor). 1º toque mostra a pergunta,
+// 2º toque em até 6 s confirma.
+var pendente = null, pendenteTimer = null;
+function confirmado(el, pergunta) {
+  if (pendente === el) {
+    clearTimeout(pendenteTimer); pendente = null;
+    el.style.background = ''; el.style.color = '';
+    return true;
+  }
+  if (pendente) { pendente.style.background = ''; pendente.style.color = ''; }
+  clearTimeout(pendenteTimer);
+  pendente = el;
+  el.style.background = '#000'; el.style.color = '#fff';
+  txt('msg', pergunta + ' Toque de novo pra confirmar.');
+  pendenteTimer = setTimeout(function () {
+    el.style.background = ''; el.style.color = '';
+    pendente = null; txt('msg', '\u00a0');
+  }, 6000);
+  return false;
+}
+
 var ocupado = false;
 function chamar(btn) {
   if (ocupado) return;
   var conf = btn.getAttribute('data-confirma');
-  if (conf && !window.confirm(conf)) return;
+  if (conf && !confirmado(btn, conf)) return;
   ocupado = true;
   btn.className = 'ativo';
   txt('msg', btn.textContent + '…');
@@ -331,7 +354,7 @@ setInterval(function () {
 // Sair: o Kindle fecha o painel e volta à tela normal (sono.sh consulta
 // input_boolean.kindle_sair). Pra voltar: KUAL → Painel Casa → Iniciar painel.
 $('sair').addEventListener('click', function () {
-  if (!window.confirm('Sair do painel e voltar ao Kindle normal?')) return;
+  if (!confirmado(this, 'Sair do painel e voltar ao Kindle normal?')) return;
   txt('msg', 'Saindo…');
   fetch('/api/services/script/kindle_sair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
 });
