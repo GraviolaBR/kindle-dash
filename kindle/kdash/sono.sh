@@ -67,6 +67,18 @@ reabrir_se_sumiu() {
     sleep 12
 }
 
+# Luz frontal: no modo painel fica SEMPRE apagada (o Kindle fica ao lado do PC,
+# com boa iluminação). O valor que estava antes é guardado em luz.salva e volta
+# quando o painel para ("Sair" da página ou "Parar painel" no KUAL), pra leitura.
+luz_apagar() {
+    LUZ=$(cat $LUZ_ARQ 2>/dev/null)
+    [ -n "$LUZ" ] && [ "$LUZ" -gt 0 ] && echo "$LUZ" > /mnt/us/kdash/luz.salva
+    echo 0 > $LUZ_ARQ 2>/dev/null
+}
+luz_restaurar() {
+    [ -f /mnt/us/kdash/luz.salva ] && cat /mnt/us/kdash/luz.salva > $LUZ_ARQ 2>/dev/null
+}
+
 # um ciclo só (iniciar.sh e o upstart checam este PID)
 PIDF=/tmp/kdash.pid
 if [ -f $PIDF ] && kill -0 "$(cat $PIDF)" 2>/dev/null; then exit 0; fi
@@ -76,6 +88,7 @@ echo $$ > $PIDF
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
 log "início"
+luz_apagar
 curto=0
 while true; do
     [ -f /mnt/us/DESLIGAR_PAINEL ] && { log "DESLIGAR_PAINEL: saindo"; break; }
@@ -130,7 +143,7 @@ while true; do
         n=$((n + 1))
         [ $n -ge $BATERIA_A_CADA ] && { enviar_bateria; n=0; }
         # a cada ~30 s (dando tempo da página carregar depois de acordar)
-        [ $((n % 6)) -eq 3 ] && reabrir_se_sumiu /
+        [ $((n % 6)) -eq 3 ] && { reabrir_se_sumiu /; luz_apagar; }
     done
     [ -f /mnt/us/DESLIGAR_PAINEL ] && continue
 
@@ -151,15 +164,12 @@ while true; do
     echo +$ESPERA > $RTC/wakealarm 2>/dev/null
     log "suspendendo (acorda em $((ESPERA / 60)) min)"
     lipc-set-prop com.lab126.wifid enable 0 2>/dev/null
-    # Luz frontal: suspendendo direto pelo kernel ela ficava acesa a noite toda
-    # (~1,6%/h de bateria em 26/11). Apaga e, ao acordar, volta ao mesmo valor.
-    LUZ=$(cat $LUZ_ARQ 2>/dev/null)
-    [ -n "$LUZ" ] && [ "$LUZ" -gt 0 ] && echo "$LUZ" > /mnt/us/kdash/luz.salva
-    echo 0 > $LUZ_ARQ 2>/dev/null
+    # (suspendendo direto pelo kernel a luz ficava acesa a noite toda, ~1,6%/h em 26/11)
+    luz_apagar
     sleep 1
     echo mem > /sys/power/state 2>/dev/null
     log "acordou"
-    cat /mnt/us/kdash/luz.salva > $LUZ_ARQ 2>/dev/null
+    luz_apagar
     curto=1
     # SSH (USBNetLite/dropbear): conexões abertas na hora da suspensão ficam
     # penduradas — o relógio do prazo para enquanto o Kindle dorme — e, somadas,
@@ -170,6 +180,7 @@ while true; do
 done
 
 rm -f $PIDF
+luz_restaurar
 lipc-set-prop com.lab126.powerd preventScreenSaver 0
 killall kindle_browser >/dev/null 2>&1
 lipc-set-prop com.lab126.appmgrd start app://com.lab126.booklet.home >/dev/null 2>&1

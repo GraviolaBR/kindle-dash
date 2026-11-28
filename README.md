@@ -143,12 +143,17 @@ do servidor o `sono.sh` chama `esperar_rede` de novo (log: "religando Wi-Fi").
 
 ## Luz frontal
 
-Suspendendo direto pelo kernel (`echo mem`), a luz frontal ficava acesa a
-noite toda: 35% → 24% entre 0h e 7h de 25 pra 26/11, ~1,6%/h, mais do que o
-ciclo acordado. Antes de suspender, o `sono.sh` guarda o valor de
-`/sys/class/backlight/bl/brightness` (0–2047) em `/mnt/us/kdash/luz.salva`,
-zera e, ao acordar, devolve o mesmo valor. Dormindo no escuro a tela não se lê
-sem luz; um toque no botão acende de novo.
+No modo painel a luz frontal fica **sempre apagada** (desde 28/11): o Kindle
+fica ao lado do PC, onde a iluminação é boa. O `sono.sh` zera
+`/sys/class/backlight/bl/brightness` (0–2047) ao iniciar, antes de suspender,
+ao acordar e a cada ~30 s acordado (caso algo do sistema a acenda). O valor que
+estava antes fica em `/mnt/us/kdash/luz.salva` e volta quando o painel para
+("Sair" da página ou "Parar painel" no KUAL), pra usar o Kindle pra ler.
+
+Histórico: suspendendo direto pelo kernel (`echo mem`) a luz ficava acesa a
+noite toda — 35% → 24% entre 0h e 7h de 25 pra 26/11 (~1,6%/h). Com ela
+apagada na suspensão (26/11), a noite de 27 pra 28/11 gastou 1% em 8 h e o dia
+inteiro ~0,5%/h (100% → 89% em 23 h, ~8–9 dias por carga).
 
 ## Biblioteca na frente do painel
 
