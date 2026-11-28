@@ -121,10 +121,26 @@ Depois: KUAL → Painel Casa → Iniciar painel (ou reiniciar o Kindle).
 - Tempos em `kindle/kdash/config.sh` (`OCIOSO`, `OCIOSO_ACORDAR`,
   `DESPERTADOR`, `NOITE_INICIO`/`NOITE_FIM`).
 
-Bateria: ~78 despertares por dia × ~45 s ≈ 1 h acordado, mais o uso. Ainda sem
-medição (estimativa de 1–2 semanas por carga); o Kindle manda a bateria a cada
-despertar, então o histórico de `sensor.kindle_bateria` no HA mostra o consumo
-real. Na tomada: KUAL → Painel Casa → Não dormir.
+Bateria: ~78 despertares por dia × ~45 s ≈ 1 h acordado, mais o uso. Medido em
+27–28/11 (histórico de `sensor.kindle_bateria` no HA, enviado a cada
+despertar): ~0,5%/h de dia, ~0,1%/h de madrugada, ~8–9 dias por carga. Na
+tomada: KUAL → Painel Casa → Não dormir.
+
+### Ler no Kindle
+
+1. Sair do painel (botão **Sair** ou KUAL → Painel Casa → Parar painel). A luz
+   frontal volta ao nível de antes do painel.
+2. Ler no leitor da Amazon ou no **KOReader** (KUAL → KOReader → Start
+   KOReader). O KOReader abre EPUB sem converter, PDF com corte de margem e
+   reflow, CBZ/DJVU, dicionário/Wikipedia e catálogos OPDS (ex.: Calibre).
+   Sair dele: menu de cima → ☰ → Sair.
+3. Voltar ao painel: KUAL → Painel Casa → Iniciar painel.
+
+KOReader instalado em 28/11/2026 (v2026.07.1, pacote **kindlehf** — o firmware
+5.17 é hard-float, `/lib/ld-linux-armhf.so.3`) em `/mnt/us/koreader` +
+`/mnt/us/extensions/koreader`. Atualiza pelo próprio KOReader (☰ → Atualizar)
+ou baixando de novo o `koreader-kindlehf-*.zip` das releases e descompactando
+em `/mnt/us`.
 
 ## Wi-Fi
 
